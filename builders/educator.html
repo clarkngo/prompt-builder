@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Educator Prompt Builder — assemble prompts for interactive HTML learning activities or text-based assignments for high school and community college." />
+  <title>Educator Prompt Builder · Prompt Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <style>
+    .chip-selectable {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding-right: 0.55rem;
+    }
+    .chip-selectable .chip-label { flex: 1; }
+    .star-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 1.65rem;
+      height: 1.65rem;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--line-strong);
+      font-size: 0.95rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color var(--transition), background var(--transition);
+    }
+    .star-btn:hover { color: var(--coral); background: var(--coral-soft); }
+    .star-btn.primary,
+    .chip-selectable.active .star-btn.primary {
+      color: var(--coral);
+      background: var(--coral-soft);
+    }
+    .star-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .chip-selectable.active { background: var(--teal-soft); border-color: var(--teal); color: var(--teal); }
+    .chip-selectable.primary-chip {
+      box-shadow: inset 0 0 0 1px var(--coral);
+    }
+    .chip-selectable.primary-chip::after {
+      content: "Primary";
+      position: absolute;
+      top: -0.45rem;
+      right: 0.45rem;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--coral);
+      color: #fff;
+      padding: 0.1rem 0.35rem;
+      border-radius: 999px;
+    }
+    .persona-chip {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      align-items: flex-start;
+      text-align: left;
+      width: 100%;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem 0.75rem 2.5rem;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+    }
+    .persona-chip .star-btn {
+      position: absolute;
+      left: 0.55rem;
+      top: 0.65rem;
+    }
+    .persona-chip.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+    .persona-chip.primary-chip {
+      box-shadow: inset 0 0 0 1px var(--coral);
+    }
+    .persona-chip .chip-title { font-weight: 750; color: var(--ink); font-size: 0.88rem; }
+    .persona-chip .chip-desc { font-size: 0.76rem; color: var(--muted); font-weight: 500; line-height: 1.4; }
+    .persona-grid-edu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.5rem;
+    }
+    .resistance-grid {
+      display: grid;
+      gap: 0.45rem;
+    }
+    .resistance-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.65rem 0.75rem;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .resistance-item.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+    .resistance-item input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      margin-top: 0.2rem;
+      accent-color: var(--teal);
+      flex-shrink: 0;
+    }
+    .resistance-meta { flex: 1; min-width: 0; }
+    .resistance-meta strong { display: block; font-size: 0.86rem; }
+    .resistance-meta span { display: block; font-size: 0.76rem; color: var(--muted); margin-top: 0.1rem; line-height: 1.4; }
+    .resistance-item input.weight-input[type="number"] {
+      width: 3.25rem;
+      min-width: 3.25rem;
+      max-width: 3.25rem;
+      flex: 0 0 3.25rem;
+      padding: 0.35rem 0.25rem;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      align-self: center;
+      box-shadow: none;
+    }
+    .score-panel {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      margin-bottom: 0.75rem;
+    }
+    .score-panel strong { font-size: 0.82rem; color: var(--ink-soft); }
+    .score-value {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--teal);
+      line-height: 1;
+    }
+    .score-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--line);
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal), var(--teal-bright));
+      transition: width var(--transition);
+    }
+    .custom-color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      align-items: center;
+    }
+    .custom-color-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .custom-color-row input[type="color"] {
+      width: 2.75rem;
+      height: 2rem;
+      padding: 2px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .mode-section { display: none; }
+    .mode-section.show { display: block; }
+    .file-types {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
+      margin-top: 0.55rem;
+    }
+    .file-types label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+    .file-types input { accent-color: var(--teal); }
+    .llm-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-left: auto;
+    }
+    .llm-row select {
+      width: auto;
+      min-width: 9rem;
+      font-size: 0.82rem;
+      padding: 0.5rem 0.65rem;
+    }
+    .topic-error {
+      color: #9a3412;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 0.35rem;
+      display: none;
+    }
+    .topic-error.show { display: block; }
+    input.invalid { border-color: var(--coral); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">Prompt <span>Workshop</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="educator.html" aria-current="page">Educator</a>
+        <a href="academic.html">Academic</a>
+        <a href="lesson.html">Lesson</a>
+        <a href="graphics.html">Graphics</a>
+        <a href="cheatsheets.html">Cheatsheets</a>
+        <a href="activities.html">Activities</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="builder-shell">
+    <div class="builder-intro">
+      <span class="eyebrow">Teaching &amp; learning</span>
+      <h1>Educator Prompt Builder</h1>
+      <p>
+        Build a structured prompt for either an interactive HTML learning activity or a text-based assignment
+        for high school or community college learners — with expert personas, learning design, accessibility,
+        and AI-resistance options baked in.
+      </p>
+    </div>
+
+    <div class="builder-layout">
+      <div class="stack" id="formPanels">
+
+        <!-- Mode -->
+        <section class="panel" aria-labelledby="mode-heading">
+          <div class="panel-head">
+            <h2 id="mode-heading">Deliverable mode</h2>
+            <span class="hint">Choose output type</span>
+          </div>
+          <div class="panel-body">
+            <div class="mode-row" role="group" aria-label="Deliverable mode">
+              <button type="button" class="mode-btn active" id="modeInteractive" data-mode="interactive">Interactive HTML Application</button>
+              <button type="button" class="mode-btn" id="modeDocument" data-mode="document">Text-Based Assignment / Document</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Core fields -->
+        <section class="panel" aria-labelledby="core-heading">
+          <div class="panel-head">
+            <h2 id="core-heading">Learning context</h2>
+            <span class="hint">Required basics</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <label class="field-label" for="topic">Topic <span aria-hidden="true">*</span></label>
+              <input type="text" id="topic" required placeholder="e.g., Photosynthesis and cellular respiration" autocomplete="off" />
+              <p class="topic-error" id="topicError" role="alert">Topic is required to generate a useful prompt.</p>
+            </div>
+            <div class="row">
+              <div>
+                <label class="field-label" for="discipline">Discipline</label>
+                <select id="discipline">
+                  <option value="Biology">Biology</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Math">Math</option>
+                  <option value="CS">CS</option>
+                  <option value="English">English</option>
+                  <option value="History">History</option>
+                  <option value="Government">Government</option>
+                  <option value="Business">Business</option>
+                  <option value="CTE">CTE</option>
+                  <option value="Health">Health</option>
+                  <option value="Art">Art</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="audience">Audience</label>
+                <select id="audience">
+                  <option value="High School 9–12">High School 9–12</option>
+                  <option value="Community College 100–200">Community College 100–200</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interactive types -->
+        <section class="panel mode-section show" id="interactiveSection" aria-labelledby="interactive-heading">
+          <div class="panel-head">
+            <h2 id="interactive-heading">Interactive activity types</h2>
+            <span class="hint">Star one as primary</span>
+          </div>
+          <div class="panel-body">
+            <p class="field-hint">Select one or more formats. Click the star on a selected type to mark it as the primary deliverable.</p>
+            <div class="chip-grid" id="interactiveGrid" role="group" aria-label="Interactive activity types"></div>
+          </div>
+        </section>
+
+        <!-- Document type -->
+        <section class="panel mode-section" id="documentSection" aria-labelledby="document-heading">
+          <div class="panel-head">
+            <h2 id="document-heading">Document type</h2>
+            <span class="hint">Assignment format</span>
+          </div>
+          <div class="panel-body">
+            <label class="field-label" for="documentType">What should the AI produce?</label>
+            <select id="documentType">
+              <option value="Lesson plan">Lesson plan</option>
+              <option value="Reading handout">Reading handout</option>
+              <option value="Discussion questions">Discussion questions</option>
+              <option value="Worksheet">Worksheet</option>
+              <option value="Essay prompt">Essay prompt</option>
+              <option value="Lab guide">Lab guide</option>
+              <option value="Study guide">Study guide</option>
+              <option value="Rubric">Rubric</option>
+              <option value="Exam/quiz">Exam/quiz</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Segmented controls -->
+        <section class="panel" aria-labelledby="controls-heading">
+          <div class="panel-head">
+            <h2 id="controls-heading">Tone &amp; scope</h2>
+            <span class="hint">Instructional style</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <span class="field-label">Instructional tone</span>
+              <div class="seg" role="group" aria-label="Instructional tone" id="toneSeg">
+                <button type="button" data-value="Formal">Formal</button>
+                <button type="button" data-value="Balanced" class="active">Balanced</button>
+                <button type="button" data-value="Conversational">Conversational</button>
+              </div>
+            </div>
+            <div>
+              <span class="field-label">Content scope</span>
+              <div class="seg" role="group" aria-label="Content scope" id="scopeSeg">
+                <button type="button" data-value="Brief">Brief</button>
+                <button type="button" data-value="Standard" class="active">Standard</button>
+                <button type="button" data-value="Extensive">Extensive</button>
+              </div>
+            </div>
+            <div id="densityBlock">
+              <span class="field-label">Text density <span class="hint" style="text-transform:none;letter-spacing:0;font-weight:600;">(interactive only)</span></span>
+              <div class="seg" role="group" aria-label="Text density" id="densitySeg">
+                <button type="button" data-value="Minimal">Minimal</button>
+                <button type="button" data-value="Balanced" class="active">Balanced</button>
+                <button type="button" data-value="Textbook">Textbook</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Personas -->
+        <section class="panel" aria-labelledby="persona-heading">
+          <div class="panel-head">
+            <h2 id="persona-heading">Expert personas</h2>
+            <span class="hint">Star the lead expert</span>
+          </div>
+          <div class="panel-body">
+            <div class="select-all-row">
+              <button type="button" class="link-btn" id="toggleAllPersonas">Select / deselect all</button>
+            </div>
+            <div class="persona-grid-edu" id="personaGrid" role="group" aria-label="Expert personas"></div>
+          </div>
+        </section>
+
+        <!-- Color palette (interactive) -->
+        <section class="panel mode-section show" id="colorSection" aria-labelledby="color-heading">
+          <div class="panel-head">
+            <h2 id="color-heading">Color palette</h2>
+            <span class="hint">CSS custom properties</span>
+          </div>
+          <div class="panel-body">
+            <div class="scheme-grid" id="schemeGrid" role="radiogroup" aria-label="Color scheme presets"></div>
+            <div class="custom-color-row" id="customColorRow">
+              <label>Primary <input type="color" id="colorPrimary" value="#0f766e" aria-label="Custom primary color" /></label>
+              <label>Accent <input type="color" id="colorAccent" value="#e05a2b" aria-label="Custom accent color" /></label>
+              <label>Background <input type="color" id="colorBackground" value="#f3f6fa" aria-label="Custom background color" /></label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Learning design -->
+        <section class="panel" aria-labelledby="design-heading">
+          <div class="panel-head">
+            <h2 id="design-heading">Learning design</h2>
+            <span class="hint">Pedagogy directives</span>
+          </div>
+          <div class="panel-body">
+            <div class="chip-grid" id="designGrid" role="group" aria-label="Learning design options"></div>
+          </div>
+        </section>
+
+        <!-- Accessibility -->
+        <section class="panel" aria-labelledby="a11y-heading">
+          <div class="panel-head">
+            <h2 id="a11y-heading">Accessibility</h2>
+            <span class="hint">Inclusive defaults</span>
+          </div>
+          <div class="panel-body">
+            <div class="chip-grid" id="a11yGrid" role="group" aria-label="Accessibility requirements"></div>
+          </div>
+        </section>
+
+        <!-- AI resistance -->
+        <section class="panel" aria-labelledby="resistance-heading">
+          <div class="panel-head">
+            <h2 id="resistance-heading">AI resistance</h2>
+            <span class="hint">Authentic assessment strategies</span>
+          </div>
+          <div class="panel-body">
+            <div class="score-panel" aria-live="polite">
+              <strong>Resistance score</strong>
+              <span class="score-value" id="resistanceScore">0</span>
+              <div class="score-bar" aria-hidden="true"><div class="score-bar-fill" id="resistanceBar" style="width:0%"></div></div>
+            </div>
+            <div class="resistance-grid" id="resistanceGrid" role="group" aria-label="AI resistance strategies"></div>
+          </div>
+        </section>
+
+        <!-- Reference materials -->
+        <section class="panel" aria-labelledby="ref-heading">
+          <div class="panel-head">
+            <h2 id="ref-heading">Reference materials</h2>
+            <span class="hint">Source handling</span>
+          </div>
+          <div class="panel-body stack">
+            <div class="chip-grid" id="refModeGrid" role="group" aria-label="Reference handling mode"></div>
+            <div>
+              <span class="field-label">Accepted file types</span>
+              <div class="file-types" id="fileTypes">
+                <label><input type="checkbox" name="fileType" value="PDF" checked /> PDF</label>
+                <label><input type="checkbox" name="fileType" value="DOCX" checked /> DOCX</label>
+                <label><input type="checkbox" name="fileType" value="PPTX" /> PPTX</label>
+                <label><input type="checkbox" name="fileType" value="TXT" checked /> TXT</label>
+                <label><input type="checkbox" name="fileType" value="CSV" /> CSV</label>
+                <label><input type="checkbox" name="fileType" value="Images" /> Images</label>
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="refUrl">Reference URL (optional)</label>
+              <input type="url" id="refUrl" placeholder="https://example.edu/resource" inputmode="url" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Additional -->
+        <section class="panel" aria-labelledby="extra-heading">
+          <div class="panel-head">
+            <h2 id="extra-heading">Additional context</h2>
+          </div>
+          <div class="panel-body">
+            <label class="field-label" for="additional">Additional requirements</label>
+            <textarea id="additional" rows="4" placeholder="Standards alignment, prerequisite knowledge, classroom constraints, grading notes, etc."></textarea>
+          </div>
+        </section>
+      </div>
+
+      <!-- Output -->
+      <aside class="panel output-panel" aria-labelledby="output-heading">
+        <div class="panel-head">
+          <h2 id="output-heading">Live prompt</h2>
+          <span class="hint">Updates as you build</span>
+        </div>
+        <div class="panel-body">
+          <div class="stats">
+            <span id="charCount">0 characters</span>
+            <span id="wordCount">0 words</span>
+          </div>
+          <div class="output-box empty" id="outputBox" role="region" aria-live="polite" aria-label="Generated prompt" tabindex="0">Select options and enter a topic to generate your prompt…</div>
+          <div class="output-actions">
+            <button type="button" class="btn btn-accent btn-sm" id="copyBtn">Copy</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="downloadBtn">Download</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="clearBtn">Clear</button>
+            <span class="copy-toast" id="copyToast" aria-live="polite">Copied!</span>
+            <div class="llm-row">
+              <label for="llmSelect" class="field-label" style="margin:0;">Open in</label>
+              <select id="llmSelect" aria-label="Choose LLM destination">
+                <option value="claude">Claude</option>
+                <option value="chatgpt">ChatGPT</option>
+                <option value="gemini">Gemini</option>
+                <option value="copilot">Copilot</option>
+              </select>
+              <button type="button" class="btn btn-primary btn-sm" id="openLlmBtn">Open in LLM</button>
+            </div>
+          </div>
+          <p class="required-note">AI-generated materials still need your subject-matter review before they reach students.</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>Prompt Workshop</strong> · Educator Prompt Builder</p>
+    <p style="margin-top:0.4rem;"><a href="../index.html">Home</a> · <a href="academic.html">Academic</a> · <a href="lesson.html">Lesson</a> · <a href="graphics.html">Graphics</a> · <a href="cheatsheets.html">Cheatsheets</a> · <a href="activities.html">Activities</a></p>
+  </footer>
+
+  <script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'promptWorkshop.educator.v1';
+
+  var INTERACTIVE_TYPES = [
+    { id: 'flashcards', label: 'Flashcards' },
+    { id: 'quiz', label: 'Interactive Quiz' },
+    { id: 'dragdrop', label: 'Drag-and-Drop Sorting' },
+    { id: 'matching', label: 'Matching Activity' },
+    { id: 'diagram', label: 'Labeled Diagram' },
+    { id: 'timeline', label: 'Timeline Explorer' },
+    { id: 'conceptmap', label: 'Concept Map Builder' },
+    { id: 'casestudy', label: 'Case-Study Walkthrough' },
+    { id: 'simulation', label: 'Scenario Simulation' },
+    { id: 'tutorial', label: 'Step-by-Step Tutorial' },
+    { id: 'worksheet', label: 'Self-Check Worksheet' },
+    { id: 'journal', label: 'Reflection Journal' }
+  ];
+
+  var PERSONAS = [
+    {
+      id: 'instructional-designer',
+      label: 'Instructional Designer',
+      desc: 'Learning objectives, scaffolding, and activity flow.',
+      role: 'Expert Instructional Designer',
+      directive: 'Apply backward design: measurable objectives, appropriate scaffolding for the stated audience, clear activity sequencing, and formative checkpoints aligned to the learning goal.'
+    },
+    {
+      id: 'sme',
+      label: 'Subject Matter Expert',
+      desc: 'Discipline accuracy and conceptual rigor.',
+      role: 'Subject Matter Expert',
+      directive: 'Ensure all content is technically accurate for the discipline, uses correct terminology, reflects current best understanding, and avoids oversimplifications that would mislead learners.'
+    },
+    {
+      id: 'assessment',
+      label: 'Assessment Specialist',
+      desc: 'Valid checks for understanding and rubrics.',
+      role: 'Assessment Specialist',
+      directive: 'Design assessment items and feedback that validly measure the stated objectives, use plausible distractors where applicable, and include clear success criteria or rubric language.'
+    },
+    {
+      id: 'web-designer',
+      label: 'Website Designer',
+      desc: 'Visual hierarchy, layout, and UX for learning.',
+      role: 'Website Designer',
+      directive: 'Prioritize clear visual hierarchy, readable typography, intuitive navigation, and a layout that supports focus and reduces cognitive load on small screens and projectors.'
+    },
+    {
+      id: 'programmer',
+      label: 'Expert Programmer',
+      desc: 'Clean, accessible, dependency-free implementation.',
+      role: 'Expert Programmer',
+      directive: 'Implement working interactivity with semantic HTML, modern CSS, and vanilla JavaScript only — no external dependencies, no console errors, and full keyboard operability for every interactive control.'
+    },
+    {
+      id: 'editor',
+      label: 'Editor',
+      desc: 'Clarity, consistency, and appropriate reading level.',
+      role: 'Professional Editor',
+      directive: 'Polish prose for clarity and consistency, match the selected instructional tone, keep sentences at an appropriate reading level for the audience, and eliminate ambiguity in instructions.'
+    },
+    {
+      id: 'research',
+      label: 'Research Validation Specialist',
+      desc: 'Source quality and factual verification.',
+      role: 'Research Validation Specialist',
+      directive: 'Flag claims that need citations, prefer reputable sources when references are used, distinguish evidence from illustration, and note where the instructor should verify facts before classroom use.'
+    }
+  ];
+
+  var COLOR_SCHEMES = [
+    { id: 'classroom', name: 'Classroom Classic', desc: 'Teal primary, warm accent, light paper background.', primary: '#0f766e', accent: '#e05a2b', background: '#f3f6fa' },
+    { id: 'forest', name: 'Forest', desc: 'Deep green with amber highlights.', primary: '#166534', accent: '#d97706', background: '#f0fdf4' },
+    { id: 'ocean', name: 'Ocean', desc: 'Navy and cyan for STEM contexts.', primary: '#1e3a5f', accent: '#0891b2', background: '#e8f4fb' },
+    { id: 'sunset', name: 'Sunset', desc: 'Warm coral and slate for humanities.', primary: '#c2410c', accent: '#334155', background: '#fff7ed' },
+    { id: 'monochrome', name: 'Monochrome', desc: 'Neutral grayscale professional look.', primary: '#1f2937', accent: '#6b7280', background: '#f9fafb' },
+    { id: 'high-contrast', name: 'High-Contrast', desc: 'Maximum readability for low vision.', primary: '#000000', accent: '#ffff00', background: '#ffffff' },
+    { id: 'custom', name: 'Custom', desc: 'Use the color pickers below.', primary: '#0f766e', accent: '#e05a2b', background: '#f3f6fa' }
+  ];
+
+  var LEARNING_DESIGN = [
+    { id: 'bloom-low', label: 'Bloom — lower order', directive: 'Emphasize remember, understand, and apply level outcomes with concrete practice.' },
+    { id: 'bloom-high', label: 'Bloom — higher order', directive: 'Emphasize analyze, evaluate, and create level tasks requiring justification and synthesis.' },
+    { id: 'udl', label: 'UDL', directive: 'Provide multiple means of representation, action/expression, and engagement (Universal Design for Learning).' },
+    { id: 'scaffold', label: 'Scaffold', directive: 'Break complex ideas into sequenced steps with models, hints, and gradually reduced support.' },
+    { id: 'selfcheck', label: 'Self-check', directive: 'Include immediate feedback or answer-reveal mechanisms so learners can monitor understanding.' },
+    { id: 'worked-example', label: 'Worked example', directive: 'Show at least one fully worked example before independent practice.' },
+    { id: 'realworld', label: 'Real-world connection', directive: 'Anchor concepts in authentic scenarios, careers, or community contexts relevant to learners.' },
+    { id: 'misconception', label: 'Misconception address', directive: 'Explicitly surface and correct common misconceptions for this topic.' }
+  ];
+
+  var ACCESSIBILITY = [
+    { id: 'contrast', label: 'Contrast', directive: 'Meet WCAG 2.2 AA contrast for text and interactive controls in all states.' },
+    { id: 'keyboard', label: 'Keyboard', directive: 'Every interactive element is reachable and operable by keyboard alone with visible focus indicators.' },
+    { id: 'screen-reader', label: 'Screen reader', directive: 'Use semantic landmarks, labels, aria-live regions for dynamic feedback, and meaningful alt text.' },
+    { id: 'plain-language', label: 'Plain language', directive: 'Prefer clear, direct wording; define jargon on first use; keep instructions unambiguous.' },
+    { id: 'captions', label: 'Captions', directive: 'If any audio or video is referenced, require captions/transcripts and describe visual content.' },
+    { id: 'dyslexia-friendly', label: 'Dyslexia-friendly', directive: 'Use generous line spacing, limited line length, left-aligned text, and avoid dense all-caps blocks.' }
+  ];
+
+  var AI_RESISTANCE = [
+    { id: 'handwritten', label: 'Handwritten component', desc: 'Require original handwritten work or annotations.', defaultWeight: 20 },
+    { id: 'reflection', label: 'Personal reflection', desc: 'Ask for experience-linked reflection AI cannot fabricate convincingly.', defaultWeight: 15 },
+    { id: 'process-log', label: 'Process log', desc: 'Document drafts, timestamps, or revision history.', defaultWeight: 15 },
+    { id: 'oral-defense', label: 'Oral defense', desc: 'Follow-up verbal explanation of choices and reasoning.', defaultWeight: 20 },
+    { id: 'local-artifact', label: 'Local artifact', desc: 'Photo, scan, or data collected in the learner\'s environment.', defaultWeight: 20 },
+    { id: 'compare-drafts', label: 'Compare drafts', desc: 'Submit multiple drafts showing substantive revision.', defaultWeight: 10 }
+  ];
+
+  var REF_MODES = [
+    { id: 'upload-pause', label: 'Upload & pause', directive: 'If reference files are provided, pause and ask the user to upload them before continuing generation.' },
+    { id: 'url-source', label: 'URL as source', directive: 'Treat the supplied reference URL as an authoritative source to summarize, cite, and align content with.' },
+    { id: 'ask-clarify', label: 'Ask clarifying questions', directive: 'Before generating, ask up to 3 concise clarifying questions about scope, prerequisites, or constraints.' }
+  ];
+
+  var LLM_URLS = {
+    claude: 'https://claude.ai/new',
+    chatgpt: 'https://chatgpt.com/',
+    gemini: 'https://gemini.google.com/app',
+    copilot: 'https://copilot.microsoft.com/'
+  };
+
+  var state = {
+    mode: 'interactive',
+    topic: '',
+    discipline: 'Biology',
+    audience: 'High School 9–12',
+    interactiveTypes: ['quiz'],
+    primaryInteractive: 'quiz',
+    documentType: 'Worksheet',
+    tone: 'Balanced',
+    scope: 'Standard',
+    density: 'Balanced',
+    personas: ['instructional-designer', 'sme'],
+    leadPersona: 'instructional-designer',
+    colorScheme: 'classroom',
+    colorPrimary: '#0f766e',
+    colorAccent: '#e05a2b',
+    colorBackground: '#f3f6fa',
+    design: ['scaffold', 'selfcheck'],
+    a11y: ['contrast', 'keyboard', 'screen-reader', 'plain-language'],
+    resistance: {},
+    refModes: ['ask-clarify'],
+    fileTypes: ['PDF', 'DOCX', 'TXT'],
+    refUrl: '',
+    additional: ''
+  };
+
+  AI_RESISTANCE.forEach(function (r) {
+    state.resistance[r.id] = { active: false, weight: r.defaultWeight };
+  });
+
+  var els = {};
+  var restoring = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  function initEls() {
+    els.topic = $('topic');
+    els.discipline = $('discipline');
+    els.audience = $('audience');
+    els.documentType = $('documentType');
+    els.additional = $('additional');
+    els.refUrl = $('refUrl');
+    els.outputBox = $('outputBox');
+    els.charCount = $('charCount');
+    els.wordCount = $('wordCount');
+    els.resistanceScore = $('resistanceScore');
+    els.resistanceBar = $('resistanceBar');
+    els.topicError = $('topicError');
+    els.colorPrimary = $('colorPrimary');
+    els.colorAccent = $('colorAccent');
+    els.colorBackground = $('colorBackground');
+    els.modeInteractive = $('modeInteractive');
+    els.modeDocument = $('modeDocument');
+    els.interactiveSection = $('interactiveSection');
+    els.documentSection = $('documentSection');
+    els.colorSection = $('colorSection');
+    els.densityBlock = $('densityBlock');
+    els.copyToast = $('copyToast');
+    els.llmSelect = $('llmSelect');
+  }
+
+  function saveState() {
+    if (restoring) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      Object.keys(saved).forEach(function (key) {
+        if (key === 'resistance' && saved.resistance) {
+          Object.keys(saved.resistance).forEach(function (rid) {
+            if (state.resistance[rid]) state.resistance[rid] = saved.resistance[rid];
+          });
+        } else if (Object.prototype.hasOwnProperty.call(state, key)) {
+          state[key] = saved[key];
+        }
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function segValue(containerId) {
+    var active = document.querySelector('#' + containerId + ' button.active');
+    return active ? active.getAttribute('data-value') : '';
+  }
+
+  function setSeg(containerId, value) {
+    document.querySelectorAll('#' + containerId + ' button').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-value') === value);
+    });
+  }
+
+  function bindSeg(containerId, stateKey) {
+    document.querySelectorAll('#' + containerId + ' button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#' + containerId + ' button').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        state[stateKey] = btn.getAttribute('data-value');
+        saveState();
+        renderOutput();
+      });
+    });
+  }
+
+  function renderInteractiveGrid() {
+    var grid = $('interactiveGrid');
+    grid.innerHTML = '';
+    INTERACTIVE_TYPES.forEach(function (item) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip chip-selectable' +
+        (state.interactiveTypes.indexOf(item.id) >= 0 ? ' active' : '') +
+        (state.primaryInteractive === item.id ? ' primary-chip' : '');
+      btn.setAttribute('data-id', item.id);
+      btn.setAttribute('aria-pressed', state.interactiveTypes.indexOf(item.id) >= 0 ? 'true' : 'false');
+
+      var star = document.createElement('button');
+      star.type = 'button';
+      star.className = 'star-btn' + (state.primaryInteractive === item.id ? ' primary' : '');
+      star.setAttribute('aria-label', 'Set ' + item.label + ' as primary');
+      star.textContent = '★';
+      star.disabled = state.interactiveTypes.indexOf(item.id) < 0;
+      star.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (state.interactiveTypes.indexOf(item.id) < 0) return;
+        state.primaryInteractive = item.id;
+        saveState();
+        renderInteractiveGrid();
+        renderOutput();
+      });
+
+      var label = document.createElement('span');
+      label.className = 'chip-label';
+      label.textContent = item.label;
+
+      btn.appendChild(star);
+      btn.appendChild(label);
+      btn.addEventListener('click', function () {
+        var idx = state.interactiveTypes.indexOf(item.id);
+        if (idx >= 0) {
+          state.interactiveTypes.splice(idx, 1);
+          if (state.primaryInteractive === item.id) {
+            state.primaryInteractive = state.interactiveTypes[0] || '';
+          }
+        } else {
+          state.interactiveTypes.push(item.id);
+          if (!state.primaryInteractive) state.primaryInteractive = item.id;
+        }
+        saveState();
+        renderInteractiveGrid();
+        renderOutput();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderPersonaGrid() {
+    var grid = $('personaGrid');
+    grid.innerHTML = '';
+    PERSONAS.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'persona-chip' +
+        (state.personas.indexOf(p.id) >= 0 ? ' active' : '') +
+        (state.leadPersona === p.id ? ' primary-chip' : '');
+      btn.setAttribute('aria-pressed', state.personas.indexOf(p.id) >= 0 ? 'true' : 'false');
+
+      var star = document.createElement('button');
+      star.type = 'button';
+      star.className = 'star-btn' + (state.leadPersona === p.id ? ' primary' : '');
+      star.setAttribute('aria-label', 'Set ' + p.label + ' as lead persona');
+      star.textContent = '★';
+      star.disabled = state.personas.indexOf(p.id) < 0;
+      star.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (state.personas.indexOf(p.id) < 0) return;
+        state.leadPersona = p.id;
+        saveState();
+        renderPersonaGrid();
+        renderOutput();
+      });
+
+      var title = document.createElement('span');
+      title.className = 'chip-title';
+      title.textContent = p.label;
+      var desc = document.createElement('span');
+      desc.className = 'chip-desc';
+      desc.textContent = p.desc;
+
+      btn.appendChild(star);
+      btn.appendChild(title);
+      btn.appendChild(desc);
+      btn.addEventListener('click', function () {
+        var idx = state.personas.indexOf(p.id);
+        if (idx >= 0) {
+          state.personas.splice(idx, 1);
+          if (state.leadPersona === p.id) {
+            state.leadPersona = state.personas[0] || '';
+          }
+        } else {
+          state.personas.push(p.id);
+          if (!state.leadPersona) state.leadPersona = p.id;
+        }
+        saveState();
+        renderPersonaGrid();
+        renderOutput();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderSchemeGrid() {
+    var grid = $('schemeGrid');
+    grid.innerHTML = '';
+    COLOR_SCHEMES.forEach(function (scheme) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'scheme-card' + (state.colorScheme === scheme.id ? ' selected' : '');
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-checked', state.colorScheme === scheme.id ? 'true' : 'false');
+
+      var swatches = document.createElement('div');
+      swatches.className = 'scheme-swatches';
+      [scheme.primary, scheme.accent, scheme.background].forEach(function (c) {
+        var s = document.createElement('span');
+        s.style.background = c;
+        swatches.appendChild(s);
+      });
+
+      var name = document.createElement('div');
+      name.className = 'scheme-name';
+      name.textContent = scheme.name;
+      var desc = document.createElement('div');
+      desc.className = 'scheme-desc';
+      desc.textContent = scheme.desc;
+
+      card.appendChild(swatches);
+      card.appendChild(name);
+      card.appendChild(desc);
+      card.addEventListener('click', function () {
+        state.colorScheme = scheme.id;
+        if (scheme.id !== 'custom') {
+          state.colorPrimary = scheme.primary;
+          state.colorAccent = scheme.accent;
+          state.colorBackground = scheme.background;
+          els.colorPrimary.value = scheme.primary;
+          els.colorAccent.value = scheme.accent;
+          els.colorBackground.value = scheme.background;
+        }
+        saveState();
+        renderSchemeGrid();
+        renderOutput();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function renderToggleChips(containerId, items, stateKey) {
+    var grid = $(containerId);
+    grid.innerHTML = '';
+    items.forEach(function (item) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip' + (state[stateKey].indexOf(item.id) >= 0 ? ' active' : '');
+      btn.setAttribute('aria-pressed', state[stateKey].indexOf(item.id) >= 0 ? 'true' : 'false');
+      btn.textContent = item.label;
+      btn.addEventListener('click', function () {
+        var idx = state[stateKey].indexOf(item.id);
+        if (idx >= 0) state[stateKey].splice(idx, 1);
+        else state[stateKey].push(item.id);
+        saveState();
+        renderToggleChips(containerId, items, stateKey);
+        renderOutput();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderResistanceGrid() {
+    var grid = $('resistanceGrid');
+    grid.innerHTML = '';
+    AI_RESISTANCE.forEach(function (item) {
+      var row = document.createElement('label');
+      row.className = 'resistance-item' + (state.resistance[item.id].active ? ' active' : '');
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = state.resistance[item.id].active;
+      cb.addEventListener('change', function () {
+        state.resistance[item.id].active = cb.checked;
+        saveState();
+        renderResistanceGrid();
+        renderOutput();
+      });
+
+      var meta = document.createElement('div');
+      meta.className = 'resistance-meta';
+      meta.innerHTML = '<strong>' + item.label + '</strong><span>' + item.desc + '</span>';
+
+      var weight = document.createElement('input');
+      weight.type = 'number';
+      weight.className = 'weight-input';
+      weight.min = '0';
+      weight.max = '50';
+      weight.value = state.resistance[item.id].weight;
+      weight.setAttribute('aria-label', 'Weight for ' + item.label);
+      weight.addEventListener('click', function (e) { e.stopPropagation(); });
+      weight.addEventListener('change', function () {
+        var v = parseInt(weight.value, 10);
+        state.resistance[item.id].weight = isNaN(v) ? item.defaultWeight : Math.max(0, Math.min(50, v));
+        weight.value = state.resistance[item.id].weight;
+        saveState();
+        updateResistanceScore();
+        renderOutput();
+      });
+
+      row.appendChild(cb);
+      row.appendChild(meta);
+      row.appendChild(weight);
+      grid.appendChild(row);
+    });
+    updateResistanceScore();
+  }
+
+  function updateResistanceScore() {
+    var total = 0;
+    AI_RESISTANCE.forEach(function (item) {
+      if (state.resistance[item.id].active) total += state.resistance[item.id].weight;
+    });
+    var capped = Math.min(100, total);
+    els.resistanceScore.textContent = String(capped);
+    els.resistanceBar.style.width = capped + '%';
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    els.modeInteractive.classList.toggle('active', mode === 'interactive');
+    els.modeDocument.classList.toggle('active', mode === 'document');
+    els.interactiveSection.classList.toggle('show', mode === 'interactive');
+    els.documentSection.classList.toggle('show', mode === 'document');
+    els.colorSection.classList.toggle('show', mode === 'interactive');
+    els.densityBlock.style.display = mode === 'interactive' ? '' : 'none';
+    saveState();
+    renderOutput();
+  }
+
+  function getColors() {
+    return {
+      primary: els.colorPrimary.value,
+      accent: els.colorAccent.value,
+      background: els.colorBackground.value
+    };
+  }
+
+  function labelById(list, id) {
+    var found = list.filter(function (x) { return x.id === id; })[0];
+    return found ? found.label : id;
+  }
+
+  function buildPrompt() {
+    var topic = state.topic.trim();
+    var lines = [];
+
+    var selectedPersonas = PERSONAS.filter(function (p) { return state.personas.indexOf(p.id) >= 0; });
+    var lead = PERSONAS.filter(function (p) { return p.id === state.leadPersona; })[0];
+
+    lines.push('## ROLE');
+    if (selectedPersonas.length) {
+      var roleParts = selectedPersonas.map(function (p) { return p.role; });
+      if (lead) {
+        lines.push('Act as a collaborative expert team led by the **' + lead.role + '**. Supporting roles: ' +
+          roleParts.filter(function (r) { return r !== lead.role; }).join(', ') + '.');
+      } else {
+        lines.push('Act as a collaborative expert team combining: ' + roleParts.join(', ') + '.');
+      }
+    } else {
+      lines.push('Act as an experienced educator and instructional designer creating materials for ' + state.audience + ' learners.');
+    }
+    lines.push('');
+
+    lines.push('## PERSONA DIRECTIVES');
+    if (selectedPersonas.length) {
+      selectedPersonas.forEach(function (p) {
+        var prefix = (lead && p.id === lead.id) ? '**[LEAD] ' + p.label + ':** ' : '**' + p.label + ':** ';
+        lines.push(prefix + p.directive);
+      });
+    } else {
+      lines.push('Apply sound pedagogy, discipline accuracy, accessible design, and clear assessment alignment.');
+    }
+    lines.push('');
+
+    lines.push('## LEARNING CONTEXT');
+    lines.push('- **Topic:** ' + (topic || '[TOPIC REQUIRED — enter a topic above]'));
+    lines.push('- **Discipline:** ' + state.discipline);
+    lines.push('- **Audience:** ' + state.audience);
+    lines.push('- **Instructional tone:** ' + state.tone);
+    lines.push('- **Content scope:** ' + state.scope);
+    if (state.mode === 'interactive') {
+      lines.push('- **Text density:** ' + state.density + ' (keep on-screen copy aligned with this density target)');
+    }
+    lines.push('');
+
+    lines.push('## DELIVERABLE');
+    if (state.mode === 'interactive') {
+      var types = state.interactiveTypes.map(function (id) {
+        var lbl = labelById(INTERACTIVE_TYPES, id);
+        return id === state.primaryInteractive ? lbl + ' (PRIMARY)' : lbl;
+      });
+      lines.push('Produce a **single self-contained HTML file** (with embedded CSS and vanilla JavaScript) that implements an interactive learning application.');
+      lines.push('');
+      lines.push('**Activity types to include:** ' + (types.length ? types.join('; ') : 'General interactive practice (choose appropriate formats)'));
+      if (state.primaryInteractive) {
+        lines.push('**Primary focus:** ' + labelById(INTERACTIVE_TYPES, state.primaryInteractive) + ' should be the central interaction; other selected types may support or wrap it.');
+      }
+      lines.push('');
+      var colors = getColors();
+      lines.push('**Visual design — use these CSS custom properties on `:root`:**');
+      lines.push('```css');
+      lines.push(':root {');
+      lines.push('  --color-primary: ' + colors.primary + ';');
+      lines.push('  --color-accent: ' + colors.accent + ';');
+      lines.push('  --color-background: ' + colors.background + ';');
+      lines.push('}');
+      lines.push('```');
+      lines.push('Apply the palette consistently to headers, buttons, cards, and feedback states. Ensure contrast remains WCAG AA compliant even with these colors.');
+      lines.push('');
+      lines.push('Requirements for the HTML deliverable:');
+      lines.push('- Semantic HTML5 landmarks, responsive layout, no external dependencies.');
+      lines.push('- All interactivity works offline in a browser with keyboard access.');
+      lines.push('- Include a clear title, brief instructions, and a printable or save-friendly view if appropriate.');
+    } else {
+      lines.push('Produce a **Markdown document** suitable for classroom use: **' + state.documentType + '**.');
+      lines.push('');
+      lines.push('Structure the document with clear headings, numbered sections where helpful, and teacher-facing notes if the format calls for them (e.g., timing, materials, differentiation).');
+      lines.push('Match the selected tone (' + state.tone + ') and scope (' + state.scope + ') — ' +
+        (state.scope === 'Brief' ? 'keep it concise and classroom-ready.' :
+          state.scope === 'Extensive' ? 'include rich detail, extensions, and differentiation options.' :
+            'provide a balanced level of detail for immediate use.'));
+    }
+    lines.push('');
+
+    var designSelected = LEARNING_DESIGN.filter(function (d) { return state.design.indexOf(d.id) >= 0; });
+    lines.push('## LEARNING DESIGN');
+    if (designSelected.length) {
+      designSelected.forEach(function (d) { lines.push('- **' + d.label + ':** ' + d.directive); });
+    } else {
+      lines.push('- Apply standard good-practice pedagogy for the audience and discipline.');
+    }
+    lines.push('');
+
+    var a11ySelected = ACCESSIBILITY.filter(function (a) { return state.a11y.indexOf(a.id) >= 0; });
+    lines.push('## ACCESSIBILITY');
+    if (a11ySelected.length) {
+      a11ySelected.forEach(function (a) { lines.push('- **' + a.label + ':** ' + a.directive); });
+    } else {
+      lines.push('- Meet baseline WCAG 2.2 AA expectations for the deliverable format.');
+    }
+    lines.push('');
+
+    lines.push('## AI-RESISTANCE');
+    var activeResistance = AI_RESISTANCE.filter(function (r) { return state.resistance[r.id].active; });
+    var score = Math.min(100, activeResistance.reduce(function (sum, r) { return sum + state.resistance[r.id].weight; }, 0));
+    lines.push('**Composite resistance score:** ' + score + '/100 (higher = more reliance on authentic student evidence)');
+    if (activeResistance.length) {
+      activeResistance.forEach(function (r) {
+        lines.push('- **' + r.label + '** (weight ' + state.resistance[r.id].weight + '): ' + r.desc);
+      });
+      lines.push('Weave these strategies into instructions, submission requirements, and/or rubric criteria so completion requires original student work.');
+    } else {
+      lines.push('- No specific AI-resistance strategies selected. Add instructor verification steps as appropriate.');
+    }
+    lines.push('');
+
+    lines.push('## REFERENCE MATERIALS');
+    var refSelected = REF_MODES.filter(function (r) { return state.refModes.indexOf(r.id) >= 0; });
+    refSelected.forEach(function (r) { lines.push('- ' + r.directive); });
+    if (state.fileTypes.length) {
+      lines.push('- **Accepted upload types if files are provided:** ' + state.fileTypes.join(', '));
+    }
+    if (state.refUrl.trim()) {
+      lines.push('- **Reference URL:** ' + state.refUrl.trim());
+    }
+    if (!refSelected.length && !state.refUrl.trim()) {
+      lines.push('- No external references specified. Use general discipline knowledge unless the instructor adds sources later.');
+    }
+    lines.push('');
+
+    lines.push('## ADDITIONAL CONTEXT');
+    if (state.additional.trim()) {
+      lines.push(state.additional.trim());
+    } else {
+      lines.push('None specified.');
+    }
+    lines.push('');
+
+    lines.push('## OUTPUT FORMAT');
+    if (state.mode === 'interactive') {
+      lines.push('Return the complete HTML source in a single fenced code block. Do not split CSS or JS into separate files. After the code block, include a 3–5 bullet summary of how to use the activity in class and one suggested extension.');
+    } else {
+      lines.push('Return the complete Markdown document in a single fenced code block. After the code block, list any materials the instructor must prepare and one optional extension activity.');
+    }
+
+    return lines.join('\n');
+  }
+
+  function renderOutput() {
+    var text = buildPrompt();
+    var hasTopic = state.topic.trim().length > 0;
+    els.outputBox.textContent = text;
+    els.outputBox.classList.toggle('empty', !hasTopic);
+    els.topic.classList.toggle('invalid', !hasTopic);
+    els.topicError.classList.toggle('show', !hasTopic);
+    els.charCount.textContent = text.length + ' characters';
+    els.wordCount.textContent = text.split(/\s+/).filter(Boolean).length + ' words';
+  }
+
+  function syncFormFromState() {
+    restoring = true;
+    els.topic.value = state.topic;
+    els.discipline.value = state.discipline;
+    els.audience.value = state.audience;
+    els.documentType.value = state.documentType;
+    els.additional.value = state.additional;
+    els.refUrl.value = state.refUrl;
+    els.colorPrimary.value = state.colorPrimary;
+    els.colorAccent.value = state.colorAccent;
+    els.colorBackground.value = state.colorBackground;
+    setSeg('toneSeg', state.tone);
+    setSeg('scopeSeg', state.scope);
+    setSeg('densitySeg', state.density);
+    setMode(state.mode);
+    document.querySelectorAll('#fileTypes input').forEach(function (cb) {
+      cb.checked = state.fileTypes.indexOf(cb.value) >= 0;
+    });
+    renderInteractiveGrid();
+    renderPersonaGrid();
+    renderSchemeGrid();
+    renderToggleChips('designGrid', LEARNING_DESIGN, 'design');
+    renderToggleChips('a11yGrid', ACCESSIBILITY, 'a11y');
+    renderToggleChips('refModeGrid', REF_MODES, 'refModes');
+    renderResistanceGrid();
+    restoring = false;
+    renderOutput();
+  }
+
+  function bindEvents() {
+    els.modeInteractive.addEventListener('click', function () { setMode('interactive'); });
+    els.modeDocument.addEventListener('click', function () { setMode('document'); });
+
+    bindSeg('toneSeg', 'tone');
+    bindSeg('scopeSeg', 'scope');
+    bindSeg('densitySeg', 'density');
+
+    ['topic', 'discipline', 'audience', 'documentType', 'additional', 'refUrl'].forEach(function (key) {
+      els[key].addEventListener('input', function () {
+        state[key === 'refUrl' ? 'refUrl' : key] = els[key].value;
+        saveState();
+        renderOutput();
+      });
+      els[key].addEventListener('change', function () {
+        state[key === 'refUrl' ? 'refUrl' : key] = els[key].value;
+        saveState();
+        renderOutput();
+      });
+    });
+
+    ['colorPrimary', 'colorAccent', 'colorBackground'].forEach(function (id) {
+      els[id].addEventListener('input', function () {
+        state.colorScheme = 'custom';
+        state.colorPrimary = els.colorPrimary.value;
+        state.colorAccent = els.colorAccent.value;
+        state.colorBackground = els.colorBackground.value;
+        saveState();
+        renderSchemeGrid();
+        renderOutput();
+      });
+    });
+
+    document.querySelectorAll('#fileTypes input').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        state.fileTypes = Array.prototype.slice.call(document.querySelectorAll('#fileTypes input:checked')).map(function (x) { return x.value; });
+        saveState();
+        renderOutput();
+      });
+    });
+
+    $('toggleAllPersonas').addEventListener('click', function () {
+      if (state.personas.length === PERSONAS.length) {
+        state.personas = [];
+        state.leadPersona = '';
+      } else {
+        state.personas = PERSONAS.map(function (p) { return p.id; });
+        if (!state.leadPersona) state.leadPersona = state.personas[0];
+      }
+      saveState();
+      renderPersonaGrid();
+      renderOutput();
+    });
+
+    $('copyBtn').addEventListener('click', function () {
+      var text = buildPrompt();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopyToast).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+    });
+
+    function fallbackCopy() {
+      var ta = document.createElement('textarea');
+      ta.value = buildPrompt();
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showCopyToast(); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
+    }
+
+    function showCopyToast() {
+      els.copyToast.classList.add('show');
+      setTimeout(function () { els.copyToast.classList.remove('show'); }, 1800);
+    }
+
+    $('downloadBtn').addEventListener('click', function () {
+      var text = buildPrompt();
+      var slug = (state.topic.trim() || 'educator-prompt').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = slug + '-prompt.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);
+      }, 100);
+    });
+
+    $('clearBtn').addEventListener('click', function () {
+      if (!confirm('Clear all builder settings and reset to defaults?')) return;
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+      state = {
+        mode: 'interactive',
+        topic: '',
+        discipline: 'Biology',
+        audience: 'High School 9–12',
+        interactiveTypes: ['quiz'],
+        primaryInteractive: 'quiz',
+        documentType: 'Worksheet',
+        tone: 'Balanced',
+        scope: 'Standard',
+        density: 'Balanced',
+        personas: ['instructional-designer', 'sme'],
+        leadPersona: 'instructional-designer',
+        colorScheme: 'classroom',
+        colorPrimary: '#0f766e',
+        colorAccent: '#e05a2b',
+        colorBackground: '#f3f6fa',
+        design: ['scaffold', 'selfcheck'],
+        a11y: ['contrast', 'keyboard', 'screen-reader', 'plain-language'],
+        resistance: {},
+        refModes: ['ask-clarify'],
+        fileTypes: ['PDF', 'DOCX', 'TXT'],
+        refUrl: '',
+        additional: ''
+      };
+      AI_RESISTANCE.forEach(function (r) {
+        state.resistance[r.id] = { active: false, weight: r.defaultWeight };
+      });
+      syncFormFromState();
+    });
+
+    $('openLlmBtn').addEventListener('click', function () {
+      var text = buildPrompt();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function () {});
+      }
+      var url = LLM_URLS[els.llmSelect.value] || LLM_URLS.claude;
+      window.open(url, '_blank', 'noopener,noreferrer');
+      showCopyToast();
+    });
+  }
+
+  initEls();
+  loadState();
+  bindEvents();
+  syncFormFromState();
+})();
+  </script>
+</body>
+</html>
