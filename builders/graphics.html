@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Instructional Graphics Prompt Builder — assemble ready-to-paste prompts for classroom diagrams, flowcharts, comparisons, and analogy illustrations." />
+  <title>Instructional Graphics · Prompt Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <style>
+    .concepts-box {
+      margin-top: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      background: var(--teal-soft);
+      border: 1px solid rgba(15, 118, 110, 0.2);
+      font-size: 0.84rem;
+      color: var(--ink-soft);
+      display: none;
+    }
+    .concepts-box.visible { display: block; }
+    .concepts-box strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: var(--teal);
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.45rem 0.85rem;
+    }
+    .check-grid.single { grid-template-columns: 1fr; }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.86rem;
+      color: var(--ink-soft);
+      line-height: 1.4;
+    }
+    .check-item input {
+      margin-top: 0.2rem;
+      accent-color: var(--teal);
+      flex-shrink: 0;
+    }
+    fieldset {
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    .details-panel {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+    }
+    .details-panel > summary {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.95rem 1.15rem;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+      border-bottom: 1px solid transparent;
+    }
+    .details-panel[open] > summary { border-bottom-color: var(--line); }
+    .details-panel > summary::-webkit-details-marker { display: none; }
+    .step-num {
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 8px;
+      display: inline-grid;
+      place-items: center;
+      background: var(--ink);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .chev {
+      margin-left: auto;
+      color: var(--muted);
+      transition: transform var(--transition);
+      font-size: 0.85rem;
+    }
+    .details-panel[open] .chev { transform: rotate(180deg); }
+    .details-body { padding: 1.1rem 1.15rem 1.25rem; }
+    .llm-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .llm-row select { flex: 1 1 160px; min-width: 0; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">Prompt <span>Workshop</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="educator.html">Educator</a>
+        <a href="academic.html">Academic</a>
+        <a href="lesson.html">Lesson</a>
+        <a href="graphics.html" aria-current="page">Graphics</a>
+        <a href="cheatsheets.html">Cheatsheets</a>
+        <a href="activities.html">Activities</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="builder-shell">
+    <header class="builder-intro">
+      <span class="eyebrow">Visuals for teaching</span>
+      <h1>Instructional Graphics Builder</h1>
+      <p>
+        Assemble a precise prompt for classroom graphics — concept diagrams, process flowcharts,
+        comparisons, timelines, and analogy illustrations — then paste it into Claude, ChatGPT,
+        Gemini, Perplexity, or Copilot to generate the image.
+      </p>
+    </header>
+
+    <div class="builder-layout">
+      <div class="stack">
+
+        <details class="details-panel" open>
+          <summary><span class="step-num">1</span> Content <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <div>
+              <label class="field-label" for="lesson">Module</label>
+              <select id="lesson"></select>
+            </div>
+            <div class="row" style="margin-top:0.85rem;">
+              <div>
+                <label class="field-label" for="subjectArea">Cluster / Theme</label>
+                <select id="subjectArea">
+                  <option>Foundations</option>
+                  <option>Prompt Engineering</option>
+                  <option>AI Tools &amp; Platforms</option>
+                  <option>Publishing &amp; Sharing</option>
+                  <option>Instructional Materials</option>
+                  <option>Assessment &amp; Rubrics</option>
+                  <option>Graphics &amp; Activities</option>
+                  <option>Meta-Prompts &amp; Interfaces</option>
+                  <option>Ethics &amp; Policy</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="gradeLevel">Classroom Audience</label>
+                <select id="gradeLevel">
+                  <option>K-12</option>
+                  <option selected>Community College / Undergraduate</option>
+                  <option>University / Graduate</option>
+                  <option>Adult / Workforce Education</option>
+                  <option>Professional Development / Faculty Training</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:0.85rem;">
+              <label class="field-label" for="customTopic">Custom Topic / Title Override <span style="font-weight:500;text-transform:none;letter-spacing:0;">(optional)</span></label>
+              <input type="text" id="customTopic" placeholder="Leave blank to use the selected module title" />
+            </div>
+            <div class="concepts-box" id="conceptsBox">
+              <strong>Key lessons / tools in this module</strong>
+              <span id="conceptsText"></span>
+            </div>
+            <fieldset style="margin-top:1rem;">
+              <legend class="field-label">Learning objective(s) to visualize</legend>
+              <p class="field-hint">Objectives update with the selected module. Check one or more.</p>
+              <div class="check-grid single" id="objectivesGrid"></div>
+            </fieldset>
+          </div>
+        </details>
+
+        <details class="details-panel" open>
+          <summary><span class="step-num">2</span> Graphic Type <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <label class="field-label" for="graphicType">Graphic type</label>
+            <select id="graphicType">
+              <option>Let the model choose based on content</option>
+              <option selected>Concept / relationship diagram</option>
+              <option>Process or workflow flowchart</option>
+              <option>Discipline-specific diagram (e.g., biological process, financial model, circuit schematic)</option>
+              <option>Comparison chart / table graphic</option>
+              <option>Timeline / historical progression</option>
+              <option>Analogy-based illustration (everyday analogies for abstract concepts)</option>
+              <option>Labeled device / component diagram</option>
+              <option>Icon set for slides or handouts</option>
+              <option>Infographic summary</option>
+              <option>Case-study visual summary</option>
+            </select>
+          </div>
+        </details>
+
+        <details class="details-panel" open>
+          <summary><span class="step-num">3</span> Visuals <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <div class="row">
+              <div>
+                <label class="field-label" for="visualStyle">Visual style</label>
+                <select id="visualStyle">
+                  <option>Flat vector illustration</option>
+                  <option>Minimal line-art / icon-based</option>
+                  <option selected>Editorial / textbook diagram</option>
+                  <option>Blueprint / schematic style</option>
+                  <option>Isometric 3D</option>
+                  <option>Hand-drawn / sketch-style</option>
+                  <option>Photorealistic render</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="tone">Tone</label>
+                <select id="tone">
+                  <option>Professional / formal</option>
+                  <option>Friendly / approachable</option>
+                  <option>Playful / engaging</option>
+                  <option selected>Authoritative / academic</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:0.85rem;">
+              <label class="field-label" for="colorScheme">Color scheme</label>
+              <select id="colorScheme">
+                <option selected>MVCC Highlander palette (navy &amp; orange)</option>
+                <option>Corporate blue &amp; gray</option>
+                <option>Monochrome / grayscale</option>
+                <option>High-contrast black &amp; white (print-safe)</option>
+                <option>Earth tones (muted green, brown, tan)</option>
+                <option>Vibrant multicolor</option>
+                <option>Institutional brand palette (specify colors when pasting)</option>
+                <option>Custom — describe in notes</option>
+              </select>
+            </div>
+            <div style="margin-top:0.85rem;max-width:280px;">
+              <label class="field-label" for="density">Complexity / density</label>
+              <select id="density">
+                <option>Minimal</option>
+                <option selected>Moderate</option>
+                <option>Rich</option>
+              </select>
+            </div>
+            <fieldset style="margin-top:1rem;">
+              <legend class="field-label">Icon &amp; illustration preference</legend>
+              <div class="check-grid">
+                <label class="check-item"><input type="checkbox" data-group="iconPref" value="Use simple, universally recognizable icons" />Use simple, universally recognizable icons</label>
+                <label class="check-item"><input type="checkbox" data-group="iconPref" value="Label every icon with a short text caption" checked />Label every icon with a short text caption</label>
+                <label class="check-item"><input type="checkbox" data-group="iconPref" value="Avoid photographic textures" />Avoid photographic textures</label>
+                <label class="check-item"><input type="checkbox" data-group="iconPref" value="Use directional arrows to show process/data flow" checked />Use directional arrows to show process/data flow</label>
+                <label class="check-item"><input type="checkbox" data-group="iconPref" value="Use consistent icon weight/line thickness throughout" />Use consistent icon weight/line thickness throughout</label>
+              </div>
+            </fieldset>
+          </div>
+        </details>
+
+        <details class="details-panel">
+          <summary><span class="step-num">4</span> Layout &amp; Size <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <div class="row">
+              <div>
+                <label class="field-label" for="sizePreset">Size preset</label>
+                <select id="sizePreset">
+                  <option>Slide (16:9, 1920×1080)</option>
+                  <option selected>Slide (4:3, 1024×768)</option>
+                  <option>Letter page (8.5×11 in, portrait)</option>
+                  <option>Letter page (8.5×11 in, landscape)</option>
+                  <option>Square (1:1) for handouts/social</option>
+                  <option>Poster (24×36 in)</option>
+                  <option>Web banner (wide)</option>
+                  <option>LMS thumbnail (small, square)</option>
+                  <option>Print handout (A4)</option>
+                  <option>Custom — specify below</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="orientation">Orientation</label>
+                <select id="orientation">
+                  <option selected>Landscape</option>
+                  <option>Portrait</option>
+                  <option>Square</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" style="margin-top:0.85rem;">
+              <div>
+                <label class="field-label" for="textAmount">Amount of text</label>
+                <select id="textAmount">
+                  <option>None — visuals only</option>
+                  <option selected>Minimal labels only</option>
+                  <option>Moderate — labels + short captions</option>
+                  <option>Text-heavy — labels, captions, and a short legend</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="customSize">Custom dimensions <span style="font-weight:500;text-transform:none;letter-spacing:0;">(optional)</span></label>
+                <input type="text" id="customSize" placeholder="e.g., 1600×900 px" />
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="details-panel">
+          <summary><span class="step-num">5</span> Output Specifications <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <div class="row">
+              <div>
+                <label class="field-label" for="fileFormat">File format</label>
+                <select id="fileFormat">
+                  <option>PNG</option>
+                  <option>JPG</option>
+                  <option>PDF</option>
+                  <option>SVG (vector, if supported)</option>
+                  <option selected>Model recommendation</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="resolution">Resolution</label>
+                <select id="resolution">
+                  <option>Screen (72–96 DPI)</option>
+                  <option selected>Standard print (150 DPI)</option>
+                  <option>High-quality print (300 DPI)</option>
+                  <option>Highest available</option>
+                </select>
+              </div>
+            </div>
+            <fieldset style="margin-top:1rem;">
+              <legend class="field-label">Options</legend>
+              <div class="check-grid">
+                <label class="check-item"><input type="checkbox" id="transparentBg" />Transparent background</label>
+                <label class="check-item"><input type="checkbox" id="safeMargins" checked />Include safe margins for slide/print bleed</label>
+              </div>
+            </fieldset>
+          </div>
+        </details>
+
+        <details class="details-panel">
+          <summary><span class="step-num">6</span> Pedagogical Constraints <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <div class="check-grid single">
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Prioritize readability at a distance (classroom projection)" checked />Prioritize readability at a distance (classroom projection)</label>
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Use a color-blind-safe palette" checked />Use a color-blind-safe palette</label>
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Avoid unnecessary jargon in visible labels; define any acronym used" checked />Avoid unnecessary jargon in visible labels; define any acronym used</label>
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Do not depict real, identifiable people, institutions, or logos without permission" checked />Do not depict real, identifiable people, institutions, or logos without permission</label>
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Keep imagery inclusive and free of stereotypes or bias" checked />Keep imagery inclusive and free of stereotypes or bias</label>
+              <label class="check-item"><input type="checkbox" data-group="pedConstraint" value="Provide a one-sentence alt-text description alongside the image" />Provide a one-sentence alt-text description alongside the image</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="details-panel" open>
+          <summary><span class="step-num">7</span> Target Model <span class="chev" aria-hidden="true">▾</span></summary>
+          <div class="details-body">
+            <label class="field-label" for="targetModel">Generate this prompt for</label>
+            <select id="targetModel">
+              <option selected>Claude</option>
+              <option>ChatGPT</option>
+              <option>Gemini</option>
+              <option>Perplexity</option>
+              <option>MS Copilot</option>
+            </select>
+            <p class="field-hint">Opening phrasing adjusts slightly for the target model’s conventions.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <aside class="panel output-panel" aria-labelledby="output-h">
+        <div class="panel-head">
+          <h2 id="output-h">Generated Prompt</h2>
+          <span class="hint">Live preview</span>
+        </div>
+        <div class="panel-body">
+          <div class="stats">
+            <span id="wordCount">0 words</span>
+            <span id="charCount">0 chars</span>
+          </div>
+          <textarea id="promptOutput" class="output-box" readonly aria-label="Generated prompt text"></textarea>
+          <div class="llm-row" style="margin-top:0.85rem;">
+            <select id="llmSelect" aria-label="Open in LLM">
+              <option value="https://claude.ai/new" selected>Claude</option>
+              <option value="https://chatgpt.com/">ChatGPT</option>
+              <option value="https://gemini.google.com/app">Gemini</option>
+              <option value="https://www.perplexity.ai/">Perplexity</option>
+              <option value="https://copilot.microsoft.com/">MS Copilot</option>
+            </select>
+            <button type="button" class="btn btn-accent btn-sm" id="openLlmBtn">Open in LLM</button>
+          </div>
+          <div class="output-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="copyBtn">Copy</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="downloadBtn">Download .txt</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="resetBtn">Reset</button>
+            <span class="copy-toast" id="copyFlash" role="status">Copied!</span>
+          </div>
+          <p class="required-note">
+            Review generated graphics against your institution’s AI Acceptable Use Policy before classroom use.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>Prompt Workshop</strong> · instructional graphics builder</p>
+    <p style="margin-top:0.4rem;">
+      <a href="educator.html">Educator</a> ·
+      <a href="academic.html">Academic</a> ·
+      <a href="lesson.html">Lesson</a> ·
+      <a href="graphics.html">Graphics</a> ·
+      <a href="cheatsheets.html">Cheatsheets</a> ·
+      <a href="activities.html">Activities</a>
+    </p>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var MODULES = [
+      {
+        title: 'Introduction to Artificial Intelligence',
+        cluster: 'Foundations',
+        concepts: [
+          'AI Fundamentals', 'Rationale for AI Integration', 'AI in Teaching and Learning',
+          'Types of AI Systems', 'AI Vocabulary', 'Myths and Misconceptions',
+          'AI Career Paths', 'Survey of AI Tools'
+        ],
+        objectives: [
+          'Define artificial intelligence, machine learning, and deep learning, and explain their growing role in education and the workforce.'
+        ]
+      },
+      {
+        title: 'Introduction to Large Language Models',
+        cluster: 'Foundations',
+        concepts: [
+          'How LLMs Work', 'Tokens & Context Windows', 'Comparing AI Models',
+          'Platform survey: Perplexity, Gemini, ChatGPT, Claude, MS Copilot, DeepSeek, Grok, Comet'
+        ],
+        objectives: [
+          'Evaluate leading AI tools and large language models (Perplexity, Gemini, ChatGPT, Claude, MS Copilot, DeepSeek, Grok, Comet) for classroom applicability and pedagogical fit.'
+        ]
+      },
+      {
+        title: 'Prompts & Prompt Engineering',
+        cluster: 'Prompt Engineering',
+        concepts: [
+          'AI Prompt Engineering', 'Prompt Engineering Basics',
+          'Prompt Architect — Academic', 'The CO-STAR Framework'
+        ],
+        objectives: [
+          'Design effective AI prompts using the CO-STAR framework to generate accurate, discipline-specific educational content.'
+        ]
+      },
+      {
+        title: 'Other Useful AI Tools',
+        cluster: 'AI Tools & Platforms',
+        concepts: [
+          'Napkin.ai (visual ideas)', 'NotebookLM (AI notes / synthesis)',
+          'Mapify (mind maps)', 'Gamma (presentations)',
+          'Goblin Tools (task breakdown / accessibility)'
+        ],
+        objectives: [
+          'Evaluate specialized AI tools for classroom applicability and demonstrate practical use in at least two educational contexts.'
+        ]
+      },
+      {
+        title: 'Building Repositories Using GitHub & iFrames',
+        cluster: 'Publishing & Sharing',
+        concepts: ['GitHub Basics', 'GitHub Pages', 'iFrame Embedding'],
+        objectives: [
+          'Create and publish a GitHub Pages repository containing at least one HTML-based AI instructional tool, accessible via a public URL, with lessons/resources embedded using iFrames.'
+        ]
+      },
+      {
+        title: 'Build AI-Powered Instructional Materials',
+        cluster: 'Instructional Materials',
+        concepts: [
+          'Lesson Plan Builder', 'Course Chatbot Builder', 'AI Study Guide Generator',
+          'Flashcard Builders', 'Technical Document Generator', 'Case Study Wizard',
+          'Discipline examples: schedules, dashboards, HVAC, genetics, microeconomics, number systems, security tools'
+        ],
+        objectives: [
+          'Create AI-generated instructional materials tailored to diverse learner needs, including lesson plans, assessments, study guides, and multimedia resources.'
+        ]
+      },
+      {
+        title: 'Generating High-Quality Assessments, Quizzes & Rubrics',
+        cluster: 'Assessment & Rubrics',
+        concepts: [
+          "Bloom's Taxonomy", 'Multiple Choice', 'Scenario-Based Questions',
+          'Analytic Rubrics', 'LMS Integration'
+        ],
+        objectives: [
+          "Create AI-generated instructional materials tailored to diverse learner needs, including assessments and analytic rubrics aligned to Bloom's Taxonomy."
+        ]
+      },
+      {
+        title: 'Instructional Graphics & Learning Activities',
+        cluster: 'Graphics & Activities',
+        concepts: [
+          'Multimedia & Animations', 'Instructional Graphics',
+          'Graphics Gallery (23 AI-generated discipline graphics)'
+        ],
+        objectives: [
+          'Design and deploy AI-powered tools and interactive applications for a specific academic discipline, experiencing how AI generates immersive, classroom-ready learning experiences across fields.'
+        ]
+      },
+      {
+        title: 'AI-Powered Meta Prompts & Interfaces',
+        cluster: 'Meta-Prompts & Interfaces',
+        concepts: [
+          'Video Resource Builder', 'AI Use Policy Builder', 'Workforce Prompt Builder',
+          'Case Study Wizard', 'Case Study Prompt Builder', 'Chatbot Builder'
+        ],
+        objectives: [
+          'Build custom AI meta-prompt tools and interfaces — policy builders, workforce prompt builders, and case-study/chatbot builders — for discipline-specific use cases.'
+        ]
+      },
+      {
+        title: 'Ethics & AI Policies',
+        cluster: 'Ethics & Policy',
+        concepts: [
+          'Integrity in the Age of AI', 'AI Detection', 'AI as Tool vs. Crutch',
+          'AI-Resistant Assignments', 'Everything Is a Remix'
+        ],
+        objectives: [
+          'Develop a classroom AI Acceptable Use Policy grounded in ethical principles, bias awareness, academic integrity standards, and data privacy requirements.'
+        ]
+      }
+    ];
+
+    var lessonSel = document.getElementById('lesson');
+    var subjectAreaSel = document.getElementById('subjectArea');
+    var conceptsBox = document.getElementById('conceptsBox');
+    var conceptsText = document.getElementById('conceptsText');
+    var objectivesGrid = document.getElementById('objectivesGrid');
+    var output = document.getElementById('promptOutput');
+    var copyFlash = document.getElementById('copyFlash');
+
+    MODULES.forEach(function (m, i) {
+      var opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = 'Module ' + (i + 1) + ' — ' + m.title;
+      lessonSel.appendChild(opt);
+    });
+
+    function checkedValues(groupName) {
+      return Array.from(document.querySelectorAll('input[data-group="' + groupName + '"]:checked'))
+        .map(function (i) { return i.value; });
+    }
+
+    function val(id) {
+      return document.getElementById(id).value;
+    }
+
+    function updateCounts(text) {
+      var words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('wordCount').textContent = words + ' words';
+      document.getElementById('charCount').textContent = text.length + ' chars';
+    }
+
+    function buildPrompt() {
+      var lesson = MODULES[Number(lessonSel.value)];
+      var topic = val('customTopic').trim() || lesson.title;
+      var moduleNum = Number(lessonSel.value) + 1;
+      var objectives = checkedValues('objectives');
+      var iconPrefs = checkedValues('iconPref');
+      var pedConstraints = checkedValues('pedConstraint');
+      var transparentBg = document.getElementById('transparentBg').checked;
+      var safeMargins = document.getElementById('safeMargins').checked;
+      var customSize = val('customSize').trim();
+      var model = val('targetModel').replace('MS Copilot', 'Copilot');
+
+      var modelIntros = {
+        Claude: 'You are helping design a classroom instructional graphic. Generate an image with the following specifications:',
+        ChatGPT: 'Generate an image for classroom instruction with the following specifications:',
+        Gemini: 'Create an educational graphic image based on these specifications:',
+        Perplexity: 'Produce an instructional graphic image following these specifications:',
+        Copilot: 'Design an instructional graphic image using Microsoft Designer / Image Creator with the following specifications:'
+      };
+
+      var lines = [];
+      lines.push(modelIntros[model] || modelIntros.Claude);
+      lines.push('');
+      lines.push('CONTENT');
+      lines.push('- Module ' + moduleNum + ': ' + topic + ' (AI Fundamentals for Educators)');
+      lines.push('- Cluster / theme: ' + val('subjectArea'));
+      lines.push('- Classroom audience: ' + val('gradeLevel'));
+      if (objectives.length) {
+        lines.push('- Learning objective(s) this graphic should support:');
+        objectives.forEach(function (o) { lines.push('  • ' + o); });
+      }
+      lines.push('');
+      lines.push('GRAPHIC TYPE');
+      lines.push('- ' + val('graphicType'));
+      lines.push('');
+      lines.push('VISUAL TREATMENT');
+      lines.push('- Visual style: ' + val('visualStyle'));
+      lines.push('- Tone: ' + val('tone'));
+      lines.push('- Color scheme: ' + val('colorScheme'));
+      lines.push('- Complexity / density: ' + val('density'));
+      if (iconPrefs.length) {
+        lines.push('- Icon/illustration preferences:');
+        iconPrefs.forEach(function (p) { lines.push('  • ' + p); });
+      }
+      lines.push('');
+      lines.push('LAYOUT & SIZE');
+      lines.push('- Size preset: ' + val('sizePreset'));
+      if (customSize) lines.push('- Custom dimensions: ' + customSize);
+      lines.push('- Orientation: ' + val('orientation'));
+      lines.push('- Amount of text on the graphic: ' + val('textAmount'));
+      lines.push('');
+      lines.push('OUTPUT SPECIFICATIONS');
+      lines.push('- File format: ' + val('fileFormat'));
+      lines.push('- Resolution: ' + val('resolution'));
+      if (transparentBg) lines.push('- Transparent background');
+      if (safeMargins) lines.push('- Include safe margins for slide/print bleed');
+      lines.push('');
+      if (pedConstraints.length) {
+        lines.push('PEDAGOGICAL & SAFEGUARD CONSTRAINTS');
+        pedConstraints.forEach(function (c) { lines.push('- ' + c); });
+        lines.push('');
+      }
+      lines.push('This graphic is for faculty development / classroom teaching use in an AI Fundamentals for Educators workshop for community college and university faculty.');
+
+      var text = lines.join('\n');
+      output.value = text;
+      updateCounts(text);
+    }
+
+    function renderLessonDetails() {
+      var lesson = MODULES[Number(lessonSel.value)];
+      subjectAreaSel.value = lesson.cluster;
+      conceptsText.textContent = lesson.concepts.join(' · ');
+      conceptsBox.classList.add('visible');
+      objectivesGrid.innerHTML = '';
+      lesson.objectives.forEach(function (obj, idx) {
+        var label = document.createElement('label');
+        label.className = 'check-item';
+        var input = document.createElement('input');
+        input.type = 'checkbox';
+        input.dataset.group = 'objectives';
+        input.value = obj;
+        if (idx === 0) input.checked = true;
+        input.addEventListener('change', buildPrompt);
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(obj));
+        objectivesGrid.appendChild(label);
+      });
+      buildPrompt();
+    }
+
+    function flashCopied() {
+      copyFlash.classList.add('show');
+      setTimeout(function () { copyFlash.classList.remove('show'); }, 1800);
+    }
+
+    function copyPrompt() {
+      var text = output.value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(flashCopied).catch(function () {
+          output.select();
+          document.execCommand('copy');
+          flashCopied();
+        });
+      } else {
+        output.select();
+        document.execCommand('copy');
+        flashCopied();
+      }
+    }
+
+    function downloadPrompt() {
+      var blob = new Blob([output.value], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'instructional-graphic-prompt.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function openInLlm() {
+      copyPrompt();
+      var url = document.getElementById('llmSelect').value;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function resetForm() {
+      document.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+      document.getElementById('customTopic').value = '';
+      document.getElementById('customSize').value = '';
+      lessonSel.value = '0';
+      document.getElementById('graphicType').selectedIndex = 1;
+      document.getElementById('visualStyle').selectedIndex = 2;
+      document.getElementById('tone').selectedIndex = 3;
+      document.getElementById('colorScheme').selectedIndex = 0;
+      document.getElementById('density').selectedIndex = 1;
+      document.getElementById('sizePreset').selectedIndex = 1;
+      document.getElementById('orientation').selectedIndex = 0;
+      document.getElementById('textAmount').selectedIndex = 1;
+      document.getElementById('fileFormat').selectedIndex = 4;
+      document.getElementById('resolution').selectedIndex = 1;
+      document.getElementById('targetModel').selectedIndex = 0;
+      document.getElementById('gradeLevel').selectedIndex = 1;
+      document.getElementById('safeMargins').checked = true;
+      document.querySelectorAll('input[data-group="pedConstraint"]').forEach(function (c, i) {
+        if (i < 5) c.checked = true;
+      });
+      document.querySelectorAll('input[data-group="iconPref"]').forEach(function (c) {
+        if (c.value.indexOf('Label') === 0 || c.value.indexOf('Use directional') === 0) c.checked = true;
+      });
+      renderLessonDetails();
+    }
+
+    lessonSel.addEventListener('change', renderLessonDetails);
+    document.querySelectorAll('select, input[type="text"], input[type="checkbox"]').forEach(function (el) {
+      el.addEventListener('input', buildPrompt);
+      el.addEventListener('change', buildPrompt);
+    });
+    document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+    document.getElementById('downloadBtn').addEventListener('click', downloadPrompt);
+    document.getElementById('resetBtn').addEventListener('click', resetForm);
+    document.getElementById('openLlmBtn').addEventListener('click', openInLlm);
+
+    lessonSel.value = '0';
+    renderLessonDetails();
+  })();
+  </script>
+</body>
+</html>

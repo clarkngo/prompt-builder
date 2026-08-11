@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lesson Content Prompt Generator — build a detailed, ready-to-paste AI prompt for OT &amp; Cybersecurity lesson HTML pages." />
+  <title>Lesson Content Generator · Prompt Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <style>
+    .builder-intro .intro-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+    .builder-intro .intro-step {
+      flex: 1 1 200px;
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+    }
+    .builder-intro .intro-step b {
+      font-family: var(--font-mono);
+      color: var(--teal);
+      margin-right: 0.35rem;
+    }
+    .panel-head h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .panel-head .step-badge {
+      display: inline-grid;
+      place-items: center;
+      width: 1.45rem;
+      height: 1.45rem;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .chip-check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 0.55rem;
+    }
+    .chip-check {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      align-items: flex-start;
+      text-align: left;
+      padding: 0.75rem 0.85rem 0.75rem 2.45rem;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .chip-check:hover { border-color: var(--teal); }
+    .chip-check.checked {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+    .chip-check input[type="checkbox"] {
+      position: absolute;
+      left: 0.85rem;
+      top: 0.85rem;
+      width: 1rem;
+      height: 1rem;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+    .chip-check .chip-title { font-weight: 750; font-size: 0.88rem; color: var(--ink); }
+    .chip-check .chip-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+    .chip-check.checked .chip-title { color: var(--teal); }
+    .tag-found { background: #fff3e0; color: #e65100; }
+    .tag-proto { background: #e3f0fd; color: #1565c0; }
+    .tag-threat { background: #fdecea; color: #c0392b; }
+    .tag-gov { background: #f3e5f5; color: #6a1b9a; }
+    .tag-idm { background: #e0f2f1; color: #00695c; }
+    .tag-ops { background: #e8f5e9; color: #276221; }
+    .tag-special { background: var(--coral-soft); color: #9a3412; }
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--line);
+      border-radius: 24px;
+      transition: background var(--transition);
+    }
+    .switch .slider::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform var(--transition);
+    }
+    .switch input:checked + .slider { background: var(--teal); }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+    .custom-color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      align-items: center;
+    }
+    .custom-color-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .custom-color-row input[type="color"] {
+      width: 2.75rem;
+      height: 2rem;
+      padding: 2px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .media-block {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--line);
+    }
+    .field-hint code {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+    }
+    #outputPrompt {
+      width: 100%;
+      min-height: 420px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      background: #0b1424;
+      color: #d7e8ff;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      resize: vertical;
+    }
+    .copy-msg {
+      opacity: 0;
+      color: var(--success);
+      font-weight: 700;
+      font-size: 0.82rem;
+      transition: opacity var(--transition);
+    }
+    .copy-msg.show { opacity: 1; }
+    .lesson-block { display: block; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">Prompt <span>Workshop</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="educator.html">Educator</a>
+        <a href="academic.html">Academic</a>
+        <a href="lesson.html" aria-current="page">Lesson</a>
+        <a href="graphics.html">Graphics</a>
+        <a href="cheatsheets.html">Cheatsheets</a>
+        <a href="activities.html">Activities</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="builder-shell">
+    <header class="builder-intro">
+      <span class="eyebrow">Curriculum drafting · OT-101</span>
+      <h1>Lesson Content Prompt Generator</h1>
+      <p>
+        Pick a lesson from the OT &amp; Cybersecurity course (or describe a custom one), choose content types,
+        accessibility requirements, and a color scheme — then generate a detailed, ready-to-paste prompt for an AI
+        assistant to draft that lesson's HTML page. Every generated prompt still requires faculty subject-matter
+        expert review before content reaches students.
+      </p>
+      <div class="intro-steps" aria-label="How to use this builder">
+        <div class="intro-step"><b>1</b> Choose a lesson &amp; content types</div>
+        <div class="intro-step"><b>2</b> Set accessibility, color, and page features</div>
+        <div class="intro-step"><b>3</b> Generate, copy, and paste into your AI assistant</div>
+      </div>
+    </header>
+
+    <div class="stack">
+
+      <!-- Step 1: Lesson -->
+      <section class="panel" aria-labelledby="lesson-h">
+        <div class="panel-head">
+          <h2 id="lesson-h"><span class="step-badge" aria-hidden="true">1</span> Lesson</h2>
+          <span class="hint">Existing OT-101 lesson or custom</span>
+        </div>
+        <div class="panel-body">
+          <div class="mode-row" role="group" aria-label="Choose lesson source">
+            <button type="button" class="mode-btn active" id="modeExisting">Choose an existing lesson</button>
+            <button type="button" class="mode-btn" id="modeCustom">Describe a custom / new lesson</button>
+          </div>
+
+          <div id="existingLessonBlock" class="lesson-block">
+            <label class="field-label" for="lessonSelect">Lesson</label>
+            <select id="lessonSelect"></select>
+            <div class="lesson-preview" id="lessonPreview" aria-live="polite"></div>
+          </div>
+
+          <div id="customLessonBlock" class="lesson-block hidden">
+            <div class="row">
+              <div>
+                <label class="field-label" for="customTitle">Lesson title</label>
+                <input type="text" id="customTitle" placeholder="e.g., Wireless and Cellular Links in OT Environments" />
+              </div>
+              <div>
+                <label class="field-label" for="customDay">Day / lesson number</label>
+                <input type="text" id="customDay" placeholder="e.g., Day 3 · Lesson 6b" />
+              </div>
+            </div>
+            <label class="field-label" for="customDesc">Short description / scope</label>
+            <textarea id="customDesc" rows="3" placeholder="What this lesson covers and why it matters…"></textarea>
+            <label class="field-label" for="customTerms" style="margin-top:0.85rem;">Key terms (comma-separated)</label>
+            <input type="text" id="customTerms" placeholder="e.g., LoRaWAN, Cellular IIoT, RF Site Survey" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Expert Personas -->
+      <section class="panel" aria-labelledby="persona-h">
+        <div class="panel-head">
+          <h2 id="persona-h"><span class="step-badge" aria-hidden="true">2</span> Expert Personas</h2>
+          <span class="hint">Expert perspective(s) for the AI</span>
+        </div>
+        <div class="panel-body">
+          <div class="select-all-row">
+            <button type="button" class="link-btn" id="togglePersonaAll">Select / deselect all</button>
+          </div>
+          <div class="chip-check-grid" id="personaGrid" role="group" aria-label="Expert personas to apply"></div>
+        </div>
+      </section>
+
+      <!-- Step 3: Content Types -->
+      <section class="panel" aria-labelledby="content-h">
+        <div class="panel-head">
+          <h2 id="content-h"><span class="step-badge" aria-hidden="true">3</span> Content to Generate</h2>
+          <span class="hint">Everything this lesson page should include</span>
+        </div>
+        <div class="panel-body">
+          <div class="select-all-row">
+            <button type="button" class="link-btn" id="toggleContentAll">Select / deselect all</button>
+          </div>
+          <div class="chip-check-grid" id="contentGrid" role="group" aria-label="Content types to generate"></div>
+        </div>
+      </section>
+
+      <!-- Step 4: Accessibility -->
+      <section class="panel" aria-labelledby="ada-h">
+        <div class="panel-head">
+          <h2 id="ada-h"><span class="step-badge" aria-hidden="true">4</span> Accessibility (ADA / WCAG)</h2>
+          <span class="hint">Accessible and equitable by default</span>
+        </div>
+        <div class="panel-body">
+          <div class="select-all-row">
+            <button type="button" class="link-btn" id="toggleAdaAll">Select / deselect all</button>
+          </div>
+          <div class="chip-check-grid" id="adaGrid" role="group" aria-label="Accessibility requirements"></div>
+        </div>
+      </section>
+
+      <!-- Step 5: Color Scheme -->
+      <section class="panel" aria-labelledby="color-h">
+        <div class="panel-head">
+          <h2 id="color-h"><span class="step-badge" aria-hidden="true">5</span> Color Scheme</h2>
+          <span class="hint">Design tokens for the generated lesson page</span>
+        </div>
+        <div class="panel-body">
+          <div class="scheme-grid" id="schemeGrid" role="radiogroup" aria-label="Color scheme presets"></div>
+          <div id="customColorBlock" class="hidden">
+            <label class="field-label">Custom palette</label>
+            <div class="custom-color-row">
+              <label>Primary accent <input type="color" id="customPrimary" value="#b45309" /></label>
+              <label>Secondary accent <input type="color" id="customSecondary" value="#1565c0" /></label>
+              <label>Header / dark surface <input type="color" id="customHeader" value="#1a1e2e" /></label>
+              <label>Light background <input type="color" id="customBg" value="#f4f6f9" /></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 6: Features -->
+      <section class="panel" aria-labelledby="features-h">
+        <div class="panel-head">
+          <h2 id="features-h"><span class="step-badge" aria-hidden="true">6</span> Page Features &amp; Lesson Details</h2>
+          <span class="hint">Required page elements and metadata</span>
+        </div>
+        <div class="panel-body stack">
+          <div>
+            <span class="field-label">Required on every generated lesson page</span>
+            <label class="feature-item">
+              <span class="switch"><input type="checkbox" id="featLightDark" checked /><span class="slider"></span></span>
+              <span>
+                <span class="ft-title">Light / dark mode toggle</span>
+                <span class="ft-desc">Button in the page header that switches themes client-side and defaults to light on first visit.</span>
+              </span>
+            </label>
+            <label class="feature-item">
+              <span class="switch"><input type="checkbox" id="featPrint" checked /><span class="slider"></span></span>
+              <span>
+                <span class="ft-title">Print / Save-as-PDF button</span>
+                <span class="ft-desc">Visible button that triggers the browser print dialog with a print stylesheet that hides navigation.</span>
+              </span>
+            </label>
+            <label class="feature-item">
+              <span class="switch"><input type="checkbox" id="featNav" checked /><span class="slider"></span></span>
+              <span>
+                <span class="ft-title">Same navigation pattern as the lesson template</span>
+                <span class="ft-desc">Sticky top bar, in-page section nav, sidebar TOC + objectives tracker, and prev/next lesson footer.</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="row">
+            <div>
+              <label class="field-label" for="contactHours">Contact hours for this lesson</label>
+              <input type="number" id="contactHours" value="4" min="1" max="8" step="0.5" />
+            </div>
+            <div>
+              <label class="field-label" for="difficulty">Difficulty level</label>
+              <select id="difficulty">
+                <option>Introductory</option>
+                <option selected>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="quizCount">Number of review questions</label>
+              <input type="number" id="quizCount" value="5" min="0" max="15" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label class="field-label" for="instructorName">Instructor name</label>
+              <input type="text" id="instructorName" value="Dr. John L. Sands" />
+            </div>
+            <div>
+              <label class="field-label" for="courseCode">Course code</label>
+              <input type="text" id="courseCode" value="OT-101" />
+            </div>
+            <div>
+              <label class="field-label" for="institution">Institution</label>
+              <input type="text" id="institution" value="Moraine Valley Community College · Dept. of Engineering &amp; Technology" />
+            </div>
+          </div>
+
+          <div class="media-block">
+            <label class="field-label" for="embedLinks">Reference links to embed (optional, one per line)</label>
+            <p class="field-hint">Format: <code>URL | optional label</code> — e.g. <code>https://www.cisa.gov/... | CISA ICS Advisory</code></p>
+            <textarea id="embedLinks" rows="3" placeholder="https://www.cisa.gov/... | CISA ICS Advisory&#10;https://www.nist.gov/... | NIST SP 800-82"></textarea>
+          </div>
+
+          <div class="media-block">
+            <label class="field-label" for="embedPdfs">PDF documents to reference/embed (optional, one per line)</label>
+            <p class="field-hint">Format: <code>filename or URL | optional caption</code>. Bare filenames are treated as sitting alongside the lesson HTML.</p>
+            <textarea id="embedPdfs" rows="3" placeholder="modbus-register-map.pdf | Modbus Register Map handout"></textarea>
+          </div>
+
+          <div class="media-block">
+            <label class="field-label" for="embedPngs">PNG images to embed inline (optional, one per line)</label>
+            <p class="field-hint">Format: <code>filename or URL | optional alt text / caption</code>. Bare filenames are treated as sitting alongside the lesson HTML.</p>
+            <textarea id="embedPngs" rows="3" placeholder="purdue-model-diagram.png | Purdue Reference Model diagram"></textarea>
+          </div>
+
+          <div class="media-block">
+            <label class="field-label" for="extraNotes">Additional instructions (optional)</label>
+            <textarea id="extraNotes" rows="3" placeholder="Anything else the generator should know — e.g. tie in a specific case study, reuse a diagram from a prior lesson, target a specific reading level, etc."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div class="generate-bar">
+        <button type="button" class="btn-generate" id="generateBtn">Generate Lesson Prompt</button>
+      </div>
+
+      <section class="panel output-section" id="outputSection" aria-labelledby="output-h">
+        <div class="panel-head">
+          <h2 id="output-h">Your Generation Prompt</h2>
+          <span class="hint">Copy into Claude or another AI assistant</span>
+        </div>
+        <div class="panel-body">
+          <textarea id="outputPrompt" readonly aria-label="Generated prompt text"></textarea>
+          <div class="output-actions">
+            <button type="button" class="btn btn-accent btn-sm" id="copyBtn">Copy to Clipboard</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="downloadBtn">Download as .txt</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="printBtn">Print this prompt</button>
+            <span class="copy-msg" id="copyMsg" aria-live="polite">Copied!</span>
+          </div>
+          <p class="required-note">Reminder: per the course Safeguards policy, any AI-generated lesson content requires subject-matter review and a source check before it reaches students.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>Prompt Workshop</strong> · Lesson Content Prompt Generator · OT-101</p>
+    <p style="margin-top:0.4rem;"><a href="../index.html">Home</a> · <a href="educator.html">Educator</a> · <a href="academic.html">Academic</a> · <a href="graphics.html">Graphics</a> · <a href="cheatsheets.html">Cheatsheets</a> · <a href="activities.html">Activities</a></p>
+  </footer>
+
+  <script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     LESSON DATA (from https://sands-mvcc.github.io/ot/)
+  ============================================================ */
+  var LESSONS = [
+    { day: 1, num: 1, strand: 'Foundations', tag: 'tag-found', file: 'lesson01.html',
+      title: 'From Isolated Plants to Converged Networks',
+      desc: 'How OT grew up separately from IT: relay logic and pneumatics, the first PLC in 1968, DCS and SCADA, serial links giving way to Ethernet, and the business pressures that finally merged the two networks.',
+      terms: 'PLC, DCS, SCADA, Convergence, Air Gap' },
+    { day: 1, num: 2, strand: 'Foundations', tag: 'tag-found', file: 'lesson02.html',
+      title: 'IT/OT Security Principles',
+      desc: "Why OT inverts the CIA triad, why safety sits above all three, and how determinism, uptime, and 20-year equipment lifecycles break the IT assumptions your students arrive with. Includes the Purdue model as a teaching scaffold.",
+      terms: 'Safety, Availability, Determinism, Purdue Model, Zones & Conduits' },
+    { day: 1, num: 3, strand: 'Foundations', tag: 'tag-found', file: 'lesson03.html',
+      title: 'OT Technologies & Field Devices',
+      desc: 'A device-by-device tour: PLCs, RTUs, IEDs, HMIs, engineering workstations, historians, sensors, actuators, drives, and safety instrumented systems. What each one does, how it fails, and what it exposes on the network.',
+      terms: 'PLC, RTU, HMI, Historian, SIS, Actuator' },
+    { day: 2, num: 4, strand: 'Protocols', tag: 'tag-proto', file: 'lesson04.html',
+      title: 'IT Protocols Inside OT Networks',
+      desc: 'Ethernet, TCP/IP, VLANs, DHCP, DNS, and NTP as they actually appear in control networks — including why static addressing and local time sources are still common, and what breaks when they are configured like an office LAN.',
+      terms: 'VLAN, DHCP, DNS, NTP, Segmentation' },
+    { day: 2, num: 5, strand: 'Protocols', tag: 'tag-proto', file: 'lesson05.html',
+      title: 'Industrial Communication Protocols',
+      desc: 'Modbus TCP, DNP3, EtherNet/IP, PROFINET, BACnet/IP, and OPC UA. Function codes and framing at a level students can read in a capture, plus why legacy protocols carry no authentication and what OPC UA changes.',
+      terms: 'Modbus TCP, DNP3, OPC UA, BACnet/IP, EtherNet/IP' },
+    { day: 3, num: 6, strand: 'Threats', tag: 'tag-threat', file: 'lesson06.html',
+      title: 'The OT Threat Landscape',
+      desc: 'Threat actors and their motivations, ransomware crossing from the business network into production, insider and contractor risk, and supply chain compromise — taught through documented incidents read as case studies.',
+      terms: 'Threat Actor, Ransomware, Insider Risk, Supply Chain, Attack Path', safety: 'Case study analysis only' },
+    { day: 3, num: 7, strand: 'Threats', tag: 'tag-threat', file: 'lesson07.html',
+      title: 'Vulnerabilities & Countermeasures',
+      desc: 'Legacy firmware, flat networks, default credentials, and the patch window that never opens — then the countermeasures that work anyway: segmentation, conduits, allowlisting, jump hosts, backups, and compensating controls.',
+      terms: 'ICS Advisory, CVE, Hardening, Allowlisting, Compensating Control', safety: 'No live exploitation' },
+    { day: 4, num: 8, strand: 'Frameworks', tag: 'tag-gov', file: 'lesson08.html',
+      title: 'Frameworks for OT Security',
+      desc: 'IEC 62443 zones, conduits, and security levels; NIST SP 800-82 and the Cybersecurity Framework; ISO/IEC 27001. How they overlap, where they differ, and how to pick one spine for a course instead of teaching four at once.',
+      terms: 'IEC 62443, NIST SP 800-82, CSF, ISO 27001, Security Level' },
+    { day: 4, num: 9, strand: 'Governance', tag: 'tag-gov', file: 'lesson09.html',
+      title: 'Governance, Risk & Compliance for IT/OT',
+      desc: 'Policy, standards, and procedure across two organizations that report to different executives. Asset inventory, risk register, POA&M tracking, audit evidence, and the sector regulation that drives budget in utilities and manufacturing.',
+      terms: 'Governance, Risk Register, POA&M, Audit, NERC CIP' },
+    { day: 5, num: 10, strand: 'Identity & Access', tag: 'tag-idm', file: 'lesson10.html',
+      title: 'Access Control & Identity Management in OT',
+      desc: 'Roles for operators, engineers, and vendors; the shared console problem and what to do about it; privileged access, jump hosts, and remote vendor sessions; where MFA is safe on a control network; and identity lifecycle in a plant.',
+      terms: 'RBAC, Least Privilege, PAM, MFA, Remote Access, Provisioning' },
+    { day: 5, num: 11, strand: 'Operations', tag: 'tag-ops', file: 'lesson11.html',
+      title: 'Monitoring, Detection & OT Incident Response',
+      desc: 'Passive asset discovery, syslog coverage gaps on field devices, time synchronization for correlation, alert triage, and an incident lifecycle where isolating the affected host may not be an option the plant can accept.',
+      terms: 'Passive Monitoring, Syslog, SIEM, Playbook, Containment' },
+    { day: 5, num: 12, strand: 'Capstone', tag: 'tag-special', file: 'lesson12.html',
+      title: 'Capstone: Build and Teach Your Own OT Module',
+      desc: 'Each participant produces a teachable module — objectives, one hands-on simulation, an assessment with a rubric, and a written safeguards statement — then teaches a segment of it and takes peer and instructor critique.',
+      terms: 'Learning Objectives, Lab Design, Rubric, Peer Review' }
+  ];
+
+  var PERSONAS = [
+    { id: 'sme-ot', label: 'SME in Operational Technology Cybersecurity', desc: 'Technical accuracy for ICS/SCADA/PLC concepts, protocols, and standards.', checked: true,
+      guidance: "A subject-matter expert in operational technology (OT) and industrial control systems cybersecurity, with hands-on knowledge of PLCs, DCS, SCADA, RTUs, HMIs, industrial protocols (Modbus, DNP3, EtherNet/IP, PROFINET, BACnet/IP, OPC UA), the Purdue model, IEC 62443, NIST SP 800-82, and real-world ICS incident response. Responsible for technical accuracy throughout: correct terminology, realistic device and protocol behavior, defensible security guidance, and alignment with how these systems actually behave in the field — not textbook oversimplification." },
+    { id: 'instructional-designer', label: 'Expert Instructional Designer', desc: 'Learning objectives, scaffolding, activities, and assessment aligned to sound pedagogy.', checked: true,
+      guidance: "An expert instructional designer skilled in backward design, Bloom's taxonomy, adult learning theory, and formative assessment, designing specifically for community college faculty as the learner audience. Responsible for the pedagogy: objectives that are measurable and appropriately scaffolded, activities that build toward those objectives, pacing that matches the stated contact hours, and assessments (quiz, artifact) that validly measure what was actually taught." },
+    { id: 'graphics-designer', label: 'Expert Graphics Designer', desc: 'Clear, accessible diagrams, illustrations, and visual hierarchy.', checked: true,
+      guidance: "An expert graphic designer specializing in technical and instructional visuals — diagrams, iconography, infographics, and concept maps — who designs for clarity at a glance, a coherent visual hierarchy, and accessible color and contrast in both light and dark themes. Responsible for how every diagram, illustration, and comparison visual is composed, labeled, and captioned — not merely that one exists." },
+    { id: 'web-developer', label: 'Expert Webpage Developer', desc: 'Clean, semantic, accessible, and dependency-free front-end implementation.', checked: true,
+      guidance: "An expert front-end web developer fluent in semantic HTML5, modern CSS, and vanilla JavaScript, with strong WCAG 2.2 implementation experience and a habit of writing clean, dependency-free, maintainable code. Responsible for how the page is actually built: correct landmark structure, working interactive components (quiz grading, flip cards, theme toggle, print button, mapping exercises, simulations), responsive layout, and code that runs correctly with no external dependencies and no console errors." }
+  ];
+
+  var CONTENT_TYPES = [
+    { id: 'objectives', label: 'Learning Objectives', desc: "Measurable, Bloom's-verb objectives tied to the lesson's key terms.", checked: true,
+      guidance: 'Write 4-6 measurable learning objectives using observable Bloom\'s-taxonomy verbs (explain, identify, compare, configure, evaluate...). Display them in the lesson overview AND mirror them as a checkable "Objectives Progress" tracker in the sidebar, exactly like the lesson template\'s .lo-list / .lo-check / progress-bar pattern.' },
+    { id: 'keyterms', label: 'Key Terms / Glossary', desc: 'Sidebar glossary plus inline definitions on first use.', checked: true,
+      guidance: 'Build a "Key Terms" sidebar card (.sidebar-toc pattern) listing each key term with a one-line definition and an anchor link to the section where it is first used. Bold and define every key term the first time it appears in body text.' },
+    { id: 'analogies', label: 'Analogies', desc: 'Anchoring analogies that connect new OT concepts to familiar ones.', checked: true,
+      guidance: 'Include at least one anchoring analogy per major module using the .analogy-box pattern (label + 1-2 short paragraphs). Analogies should connect an unfamiliar OT/ICS concept to something the audience (community college faculty, many with an IT background) already understands.' },
+    { id: 'examples', label: 'Worked Examples', desc: 'Concrete, realistic examples/scenarios illustrating each concept.', checked: true,
+      guidance: 'For each major concept, include at least one concrete, realistic worked example or short scenario (e.g., a specific PLC model, a specific Modbus register read, a specific network diagram) grounded in an industrial or utility context — not abstract description alone.' },
+    { id: 'diagrams', label: 'Instructional Diagrams', desc: 'Structural diagrams: Purdue model, network zones, protocol stacks.', checked: true,
+      guidance: 'Produce instructional diagrams as accessible, dependency-free inline HTML/CSS or inline SVG (never an external image file). Reuse the site\'s existing diagram patterns where they fit: .course-map-grid for concept maps, .domain-compare for two-column comparisons, or a custom SVG network/zone diagram. Every diagram needs a text alternative (a caption or adjacent descriptive paragraph) sufficient for a screen-reader user to get the same information.' },
+    { id: 'activities', label: 'Interactive Activities', desc: 'Think-pair-share, mapping exercises, flip-card concept checks.', checked: true,
+      guidance: 'Include at least one hands-on interactive activity using the .activity-block pattern (header with title + time estimate, instructions block, and a clear individual/pair/share structure where applicable). Where a matching or mapping exercise fits, use the .mapping-table-wrap + <select> pattern with a "Check My Mapping" / "Reset" button pair, same as the lesson template.' },
+    { id: 'illustrations', label: 'Illustrations', desc: 'Inline SVG device/protocol icons and explanatory graphics.', checked: true,
+      guidance: 'Add inline SVG illustrations (device icons, protocol stack visuals, simple isometric-style equipment sketches) rather than external image files. Decorative illustrations get aria-hidden="true"; explanatory illustrations get a text alternative.' },
+    { id: 'simulations', label: 'Simulations', desc: 'Small embedded JS simulators (Modbus exchange, syslog feed, etc.), matching the OT Simulator Suite.', checked: true,
+      guidance: 'Where the lesson topic supports it, embed a small self-contained JavaScript simulation consistent with the course\'s OT Simulator Suite (e.g., a Modbus request/response builder, a syslog timeline, an access-control matrix builder). Simulations must run entirely client-side, touch no real network or hardware, and carry a visible "Simulation only — no live equipment" safety flag matching the launch page\'s .safety-flag style.' },
+    { id: 'reviewquestions', label: 'Review Questions', desc: 'Multiple-choice knowledge check with instant feedback, like the lesson template quiz.', checked: true,
+      guidance: 'Build a knowledge-check quiz using the .quiz-block pattern: numbered questions, four answer choices each, a "Grade My Quiz" button producing instant per-question feedback (.q-feedback correct/incorrect/unanswered states) and a running score display. Distractors should be plausible, not silly, and the feedback text should explain *why* the correct answer is correct.' },
+    { id: 'comparisontables', label: 'Comparative Tables', desc: 'Side-by-side tables comparing protocols, frameworks, or standards.', checked: true,
+      guidance: 'Where the lesson compares multiple things (protocols, frameworks, standards, device types), present the comparison as a real HTML <table> using the lesson template\'s table styling (dark header row, zebra-free borders, hover highlight) rather than as prose — this is what the "Comparative Tables" content type calls for.' }
+  ];
+
+  var ADA_ITEMS = [
+    { id: 'contrast', label: 'WCAG 2.2 AA color contrast', desc: 'Minimum 4.5:1 for body text, 3:1 for large text and UI components, in both light and dark themes.', checked: true },
+    { id: 'keyboard', label: 'Full keyboard operability', desc: 'Every interactive element (flip cards, quiz, theme toggle, print button, mapping selects) is reachable and operable by keyboard alone, with a visible focus indicator.', checked: true },
+    { id: 'semantic', label: 'Semantic HTML & heading order', desc: 'Proper landmark elements (header, nav, main, aside, footer) and a heading hierarchy with no skipped levels.', checked: true },
+    { id: 'aria', label: 'ARIA labels for custom widgets', desc: 'role, aria-expanded, aria-checked, aria-live, and similar attributes on flip cards, progress trackers, and quiz feedback regions.', checked: true },
+    { id: 'alttext', label: 'Alt text for all visuals', desc: 'Meaningful alt text or adjacent text description for every diagram/illustration; purely decorative graphics marked aria-hidden.', checked: true },
+    { id: 'captions', label: 'Captions/transcripts for media', desc: 'Any embedded audio or video includes captions or a full transcript.', checked: true },
+    { id: 'skiplink', label: 'Skip-to-content link', desc: 'A visible-on-focus "Skip to main content" link at the top of the page.', checked: true },
+    { id: 'motion', label: 'Respect reduced-motion preference', desc: 'All animations (flip cards, transitions) are disabled or minimized under prefers-reduced-motion: reduce.', checked: true },
+    { id: 'plainlanguage', label: 'Plain-language readability', desc: 'Define jargon on first use; keep sentences direct; aim for a reading level appropriate to community college faculty (not a general public audience, but no unnecessary complexity).', checked: true },
+    { id: 'resizable', label: 'Resizable / zoom-friendly layout', desc: 'Layout remains usable at 200% browser zoom; no text is clipped or overlapping; avoid fixed pixel heights that trap content.', checked: true },
+    { id: 'section508', label: 'Section 508 / ADA Title II note', desc: 'Include a short accessibility statement in the footer noting the page targets WCAG 2.2 AA / Section 508 conformance.', checked: false }
+  ];
+
+  var SCHEMES = [
+    { id: 'ot-default', name: 'OT Amber & Navy (course default)', desc: 'Matches the existing course launch page.',
+      swatches: ['#1a1e2e', '#b45309', '#f4f6f9'],
+      tokens: { bg: '#f4f6f9', surface: '#ffffff', text: '#1a1e2e', textMuted: '#5a6480', accent: '#b45309', accent2: '#92400e', headerBg: '#1a1e2e', headerText: '#ffffff', border: '#d1d9e6',
+        darkBg: '#0f1117', darkSurface: '#1c1f2e', darkText: '#e8ecf4', darkAccent: '#f59e0b', darkHeaderBg: '#0a0c14' } },
+    { id: 'oxblood-gold', name: 'Oxblood & Gold', desc: "Matches the sample AI-103 lesson template's palette.",
+      swatches: ['#6b1a1a', '#c8960c', '#faf8f4'],
+      tokens: { bg: '#faf8f4', surface: '#ffffff', text: '#1a1a1a', textMuted: '#6b6b6b', accent: '#6b1a1a', accent2: '#8c2a2a', headerBg: '#6b1a1a', headerText: '#ffffff', border: '#d4cdbf',
+        darkBg: '#1a1210', darkSurface: '#241a17', darkText: '#f2ede3', darkAccent: '#e8b830', darkHeaderBg: '#120a08' } },
+    { id: 'slate-teal', name: 'Slate & Teal', desc: 'High-contrast, modern, technical.',
+      swatches: ['#111827', '#0f766e', '#f5f7f8'],
+      tokens: { bg: '#f5f7f8', surface: '#ffffff', text: '#111827', textMuted: '#4b5563', accent: '#0f766e', accent2: '#0d9488', headerBg: '#111827', headerText: '#ffffff', border: '#d6dbe1',
+        darkBg: '#0b1220', darkSurface: '#131c2b', darkText: '#e5eaf0', darkAccent: '#2dd4bf', darkHeaderBg: '#070c14' } },
+    { id: 'forest-copper', name: 'Forest & Copper', desc: 'Industrial, earthy, utility-sector feel.',
+      swatches: ['#1b4332', '#b45f06', '#f6f5f1'],
+      tokens: { bg: '#f6f5f1', surface: '#ffffff', text: '#1c2320', textMuted: '#5a655e', accent: '#b45f06', accent2: '#8a4805', headerBg: '#1b4332', headerText: '#ffffff', border: '#d8d4c6',
+        darkBg: '#0e1512', darkSurface: '#152019', darkText: '#e9ede9', darkAccent: '#e08a2e', darkHeaderBg: '#081310' } },
+    { id: 'custom', name: 'Custom palette', desc: 'Pick your own primary, secondary, header, and background colors.',
+      swatches: null, tokens: null }
+  ];
+
+  var selectedScheme = 'ot-default';
+  var lessonMode = 'existing';
+
+  var lessonSelect = document.getElementById('lessonSelect');
+  var lessonPreview = document.getElementById('lessonPreview');
+  var modeExisting = document.getElementById('modeExisting');
+  var modeCustom = document.getElementById('modeCustom');
+  var existingLessonBlock = document.getElementById('existingLessonBlock');
+  var customLessonBlock = document.getElementById('customLessonBlock');
+  var customColorBlock = document.getElementById('customColorBlock');
+  var outputSection = document.getElementById('outputSection');
+  var outputPrompt = document.getElementById('outputPrompt');
+
+  /* ============================================================
+     RENDER: lesson dropdown
+  ============================================================ */
+  LESSONS.forEach(function (l, i) {
+    var opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = 'Day ' + l.day + ' · Lesson ' + l.num + ' — ' + l.title;
+    lessonSelect.appendChild(opt);
+  });
+
+  function renderLessonPreview() {
+    var l = LESSONS[Number(lessonSelect.value)];
+    var safetyHtml = l.safety ? '<div class="safety-flag">⚠ ' + l.safety + '</div>' : '';
+    lessonPreview.innerHTML =
+      '<div class="lp-top">' +
+        '<span>Day ' + l.day + ' · Lesson ' + l.num + '</span>' +
+        '<span class="strand-tag ' + l.tag + '">' + l.strand + '</span>' +
+      '</div>' +
+      '<div class="lp-title">' + l.title + '</div>' +
+      '<div class="lp-desc">' + l.desc + '</div>' +
+      '<div class="lp-terms"><strong>Key terms:</strong> ' + l.terms + '</div>' +
+      safetyHtml;
+  }
+
+  function setLessonMode(mode) {
+    lessonMode = mode;
+    modeExisting.classList.toggle('active', mode === 'existing');
+    modeCustom.classList.toggle('active', mode === 'custom');
+    existingLessonBlock.classList.toggle('hidden', mode !== 'existing');
+    customLessonBlock.classList.toggle('hidden', mode !== 'custom');
+  }
+
+  modeExisting.addEventListener('click', function () { setLessonMode('existing'); });
+  modeCustom.addEventListener('click', function () { setLessonMode('custom'); });
+  lessonSelect.addEventListener('change', renderLessonPreview);
+  renderLessonPreview();
+
+  /* ============================================================
+     RENDER: chip grids
+  ============================================================ */
+  function renderChipGrid(containerId, items, groupName) {
+    var container = document.getElementById(containerId);
+    container.innerHTML = items.map(function (item) {
+      return (
+        '<label class="chip-check' + (item.checked ? ' checked' : '') + '" id="chip-' + groupName + '-' + item.id + '">' +
+          '<input type="checkbox" data-group="' + groupName + '" data-id="' + item.id + '"' + (item.checked ? ' checked' : '') + ' />' +
+          '<span class="chip-title">' + item.label + '</span>' +
+          '<span class="chip-desc">' + item.desc + '</span>' +
+        '</label>'
+      );
+    }).join('');
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+      input.addEventListener('change', function () { onChipToggle(input); });
+    });
+  }
+
+  function onChipToggle(input) {
+    var chip = document.getElementById('chip-' + input.dataset.group + '-' + input.dataset.id);
+    if (chip) chip.classList.toggle('checked', input.checked);
+  }
+
+  function toggleAll(groupName) {
+    var inputs = document.querySelectorAll('input[data-group="' + groupName + '"]');
+    var allChecked = Array.prototype.every.call(inputs, function (i) { return i.checked; });
+    inputs.forEach(function (input) {
+      input.checked = !allChecked;
+      onChipToggle(input);
+    });
+  }
+
+  renderChipGrid('personaGrid', PERSONAS, 'persona');
+  renderChipGrid('contentGrid', CONTENT_TYPES, 'content');
+  renderChipGrid('adaGrid', ADA_ITEMS, 'ada');
+
+  document.getElementById('togglePersonaAll').addEventListener('click', function () { toggleAll('persona'); });
+  document.getElementById('toggleContentAll').addEventListener('click', function () { toggleAll('content'); });
+  document.getElementById('toggleAdaAll').addEventListener('click', function () { toggleAll('ada'); });
+
+  /* ============================================================
+     RENDER: color scheme cards
+  ============================================================ */
+  var schemeGrid = document.getElementById('schemeGrid');
+
+  function renderSchemeGrid() {
+    schemeGrid.innerHTML = SCHEMES.map(function (s) {
+      var swatchHtml = s.swatches
+        ? s.swatches.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join('')
+        : '<span style="background:linear-gradient(135deg,#b45309,#1565c0,#1a1e2e)"></span>';
+      return (
+        '<div class="scheme-card' + (s.id === selectedScheme ? ' selected' : '') + '" id="scheme-' + s.id + '"' +
+          ' role="radio" aria-checked="' + (s.id === selectedScheme) + '" tabindex="0"' +
+          ' data-scheme="' + s.id + '">' +
+          '<div class="scheme-swatches">' + swatchHtml + '</div>' +
+          '<div class="scheme-name">' + s.name + '</div>' +
+          '<div class="scheme-desc">' + s.desc + '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    schemeGrid.querySelectorAll('.scheme-card').forEach(function (card) {
+      card.addEventListener('click', function () { selectScheme(card.dataset.scheme); });
+      card.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectScheme(card.dataset.scheme);
+        }
+      });
+    });
+  }
+
+  function selectScheme(id) {
+    selectedScheme = id;
+    SCHEMES.forEach(function (s) {
+      var el = document.getElementById('scheme-' + s.id);
+      if (!el) return;
+      var isSelected = s.id === id;
+      el.classList.toggle('selected', isSelected);
+      el.setAttribute('aria-checked', String(isSelected));
+    });
+    customColorBlock.classList.toggle('hidden', id !== 'custom');
+  }
+
+  renderSchemeGrid();
+
+  /* ============================================================
+     PROMPT GENERATION
+  ============================================================ */
+  function getSelectedLessonInfo() {
+    if (lessonMode === 'existing') {
+      var idx = Number(lessonSelect.value);
+      var l = LESSONS[idx];
+      var prev = LESSONS[idx - 1] || null;
+      var next = LESSONS[idx + 1] || null;
+      return {
+        title: l.title,
+        dayLabel: 'Day ' + l.day + ' · Lesson ' + l.num,
+        strand: l.strand,
+        desc: l.desc,
+        terms: l.terms,
+        file: l.file,
+        safety: l.safety || null,
+        prevLabel: prev ? 'Day ' + prev.day + ' · Lesson ' + prev.num + ' — ' + prev.title + ' (' + prev.file + ')' : null,
+        nextLabel: next ? 'Day ' + next.day + ' · Lesson ' + next.num + ' — ' + next.title + ' (' + next.file + ')' : null
+      };
+    }
+    return {
+      title: document.getElementById('customTitle').value.trim() || 'Untitled Lesson',
+      dayLabel: document.getElementById('customDay').value.trim() || '(day/lesson number not specified)',
+      desc: document.getElementById('customDesc').value.trim() || '(no description provided — infer scope from the title and key terms)',
+      terms: document.getElementById('customTerms').value.trim() || '(no key terms provided — propose 4-6 appropriate ones)',
+      strand: 'Custom',
+      file: null,
+      safety: null,
+      prevLabel: null,
+      nextLabel: null
+    };
+  }
+
+  function getColorTokens() {
+    if (selectedScheme !== 'custom') {
+      return SCHEMES.find(function (s) { return s.id === selectedScheme; }).tokens;
+    }
+    var primary = document.getElementById('customPrimary').value;
+    var secondary = document.getElementById('customSecondary').value;
+    var header = document.getElementById('customHeader').value;
+    var bg = document.getElementById('customBg').value;
+    return {
+      bg: bg, surface: '#ffffff', text: '#1a1a1a', textMuted: '#5a5a5a',
+      accent: primary, accent2: secondary, headerBg: header, headerText: '#ffffff', border: '#d8d8d8',
+      darkBg: '#0f1117', darkSurface: '#1c1f2e', darkText: '#e8ecf4', darkAccent: primary, darkHeaderBg: '#0a0c14'
+    };
+  }
+
+  function getChecked(groupName) {
+    return Array.prototype.map.call(
+      document.querySelectorAll('input[data-group="' + groupName + '"]:checked'),
+      function (i) { return i.dataset.id; }
+    );
+  }
+
+  function parseMediaLines(id) {
+    var raw = document.getElementById(id).value.trim();
+    if (!raw) return [];
+    return raw.split('\n').map(function (line) { return line.trim(); }).filter(Boolean).map(function (line) {
+      var parts = line.split('|').map(function (p) { return p.trim(); });
+      return { ref: parts[0], label: parts.slice(1).join('|').trim() };
+    }).filter(function (item) { return item.ref; });
+  }
+
+  function generatePrompt() {
+    var lesson = getSelectedLessonInfo();
+    var personaIds = getChecked('persona');
+    var contentIds = getChecked('content');
+    var adaIds = getChecked('ada');
+    var tokens = getColorTokens();
+    var featLightDark = document.getElementById('featLightDark').checked;
+    var featPrint = document.getElementById('featPrint').checked;
+    var featNav = document.getElementById('featNav').checked;
+    var contactHours = document.getElementById('contactHours').value || '4';
+    var difficulty = document.getElementById('difficulty').value;
+    var quizCount = document.getElementById('quizCount').value || '5';
+    var instructorName = document.getElementById('instructorName').value || 'Dr. John L. Sands';
+    var courseCode = document.getElementById('courseCode').value || 'OT-101';
+    var institution = document.getElementById('institution').value || 'Moraine Valley Community College';
+    var extraNotes = document.getElementById('extraNotes').value.trim();
+    var embedLinks = parseMediaLines('embedLinks');
+    var embedPdfs = parseMediaLines('embedPdfs');
+    var embedPngs = parseMediaLines('embedPngs');
+
+    var contentLines = CONTENT_TYPES.filter(function (c) { return contentIds.indexOf(c.id) !== -1; })
+      .map(function (c, i) { return (i + 1) + '. **' + c.label + '** — ' + c.guidance; }).join('\n');
+
+    var adaLines = ADA_ITEMS.filter(function (a) { return adaIds.indexOf(a.id) !== -1; })
+      .map(function (a) { return '- **' + a.label + '**: ' + a.desc; }).join('\n');
+
+    var linksBlock = embedLinks.length
+      ? 'Reference links — cite and link these as supporting resources at the appropriate point in the lesson (e.g., a "Further Reading" list, an inline citation, or a resource card). Open external links in a new tab and use the given label as the visible link text where provided:\n' +
+        embedLinks.map(function (l, i) { return (i + 1) + '. ' + l.ref + (l.label ? ' — "' + l.label + '"' : ''); }).join('\n')
+      : 'No external reference links were specified for this lesson.';
+
+    var pdfsBlock = embedPdfs.length
+      ? 'PDF documents — reference these as clearly labeled downloadable resources (e.g., "📄 Download: <caption>"). If a value is a bare filename rather than a full URL, assume the PDF will be placed alongside the lesson HTML file in the same folder and link to it by that relative filename:\n' +
+        embedPdfs.map(function (p, i) { return (i + 1) + '. ' + p.ref + (p.label ? ' — "' + p.label + '"' : ''); }).join('\n')
+      : 'No PDF documents were specified for this lesson.';
+
+    var pngsBlock = embedPngs.length
+      ? 'PNG images — embed these inline with <img> at the appropriate point in the lesson content, sized responsively (max-width:100%; height:auto), with meaningful alt text drawn from the caption provided (required under the accessibility settings above). If a value is a bare filename rather than a full URL, assume the image will be placed alongside the lesson HTML file in the same folder:\n' +
+        embedPngs.map(function (p, i) {
+          return (i + 1) + '. ' + p.ref + (p.label ? ' — alt/caption: "' + p.label + '"' : ' — (no caption given; write a concise, accurate alt text based on the filename and lesson context)');
+        }).join('\n')
+      : 'No PNG images were specified for this lesson.';
+
+    var navLine = featNav
+      ? '- Reproduce the lesson template\'s navigation pattern exactly: a slim top bar with a "← Course Home" link back to index.html plus institution/instructor text; a colored header with an eyebrow line (course code · day/lesson · contact hours), an H1 lesson title, a one-sentence tagline, and a meta row (level, duration, objective count); a sticky in-page section nav with anchor links that highlights the active section on scroll; a two-column body (main content + a sticky right sidebar containing an on-page table of contents, an objectives progress tracker with checkable items, a key-terms mini-glossary, and prev/next lesson links); and a footer nav bar plus a full footer repeating the course/institution/instructor line, matching the structure demonstrated in the course\'s existing lesson template.'
+      : '- Page navigation is flexible — use your judgment, but still link back to index.html.';
+
+    var lightDarkLine = featLightDark
+      ? '- Add a light/dark mode toggle button in the header, implemented client-side with a data-theme attribute on <html>, CSS custom properties for both themes, and localStorage persistence. It MUST default to light mode on first visit (only switch to dark if the visitor previously chose it).'
+      : '- A light/dark toggle is not required for this page.';
+
+    var printLine = featPrint
+      ? '- Add a visible "Print / Save as PDF" button that calls window.print(). Include an @media print stylesheet block that hides the top bar, in-page nav, and sidebar, expands the main content to full width, and forces a white background so the printed/PDF output is clean and readable.'
+      : '- A dedicated print button is not required for this page (browser printing may still work by default).';
+
+    var safetyLine = lesson.safety
+      ? '\n**Safety flag for this lesson:** "' + lesson.safety + '" — display this prominently near the top of the page (a small badge/callout), consistent with the launch page\'s safety-flag styling, and make sure no activity in this lesson asks students to touch live equipment, run exploit code, or attack a real system.'
+      : '';
+
+    var prevNextLine = (lesson.prevLabel || lesson.nextLabel)
+      ? '\n**Adjacent lessons for prev/next navigation:**\n' +
+        (lesson.prevLabel ? '- Previous: ' + lesson.prevLabel : '- Previous: none (this is the first lesson)') + '\n' +
+        (lesson.nextLabel ? '- Next: ' + lesson.nextLabel : '- Next: none (this is the last lesson)')
+      : '';
+
+    var filenameLine = lesson.file
+      ? 'Save the output as **' + lesson.file + '**, matching the filename already linked from the course launch page (index.html).'
+      : 'Propose an appropriate lessonNN.html filename consistent with the course\'s existing numbering (lesson01.html – lesson12.html).';
+
+    var selectedPersonas = PERSONAS.filter(function (p) { return personaIds.indexOf(p.id) !== -1; });
+    var roleIntro = selectedPersonas.length
+      ? 'Act as a collaborative team combining these expert perspectives, and apply each one where it is relevant rather than favoring just one:\n\n' +
+        selectedPersonas.map(function (p, i) { return (i + 1) + '. **' + p.label + '** — ' + p.guidance; }).join('\n\n') + '\n\nUsing that combined expertise, y'
+      : 'Acting as an experienced OT curriculum developer, y';
+
+    var prompt = roleIntro + 'ou are building one lesson page for a faculty development workshop: "Teaching Operational Technologies and Cybersecurity for Community College Faculty" (course code ' + courseCode + ', ' + institution + ', instructor ' + instructorName + '). The course launch page lives at index.html (https://sands-mvcc.github.io/ot/) and already links to this lesson.\n\n' +
+      '============================================================\n' +
+      'LESSON TO BUILD\n' +
+      '============================================================\n' +
+      'Title: ' + lesson.title + '\n' +
+      'Day / Lesson number: ' + lesson.dayLabel + '\n' +
+      'Strand: ' + lesson.strand + '\n' +
+      'Contact hours: ' + contactHours + '\n' +
+      'Difficulty level: ' + difficulty + '\n' +
+      'Scope / description: ' + lesson.desc + '\n' +
+      'Key terms: ' + lesson.terms + '\n' +
+      filenameLine + safetyLine + prevNextLine + '\n\n' +
+      '============================================================\n' +
+      'REQUIRED PAGE STRUCTURE (match the course\'s existing lesson template)\n' +
+      '============================================================\n' +
+      'Build a single, self-contained HTML file (inline <style> and <script>, no external CSS/JS dependencies other than optional web fonts) that follows the same format, visual style, and navigation pattern already established for this course\'s lessons:\n' +
+      navLine + '\n' +
+      '- Open the main content with a "Lesson Overview" section (an orienting paragraph or two, one anchoring analogy, and a bulleted list of the lesson\'s learning objectives).\n' +
+      '- Organize the rest of the lesson into clearly labeled sections/modules, each with an icon + title + a small time estimate, grouped under "Part" banners (e.g., Part A / Part B) if the lesson has a natural lecture-then-lab split.\n' +
+      '- Close with a review/knowledge-check section and a short assessment artifact description if appropriate for this lesson.\n' +
+      lightDarkLine + '\n' +
+      printLine + '\n' +
+      '- Respect the course\'s existing Safeguards & Responsible Use policy throughout: no activity touches live/production equipment or energized panels; all hands-on work is simulation-only or on isolated bench hardware; the course teaches defense, not offensive tooling; real incidents are discussed as case studies, not step-by-step procedures; no vendor/employer/customer data appears in examples.\n\n' +
+      '============================================================\n' +
+      'CONTENT TO INCLUDE (' + contentIds.length + ' type' + (contentIds.length === 1 ? '' : 's') + ' selected)\n' +
+      '============================================================\n' +
+      (contentLines || '(No content types were selected — at minimum include learning objectives and a short overview.)') + '\n\n' +
+      'Include approximately ' + quizCount + ' review questions if "Review Questions" was selected above.\n\n' +
+      '============================================================\n' +
+      'VISUAL DESIGN / COLOR TOKENS\n' +
+      '============================================================\n' +
+      'Use these design tokens as CSS custom properties (adapt names as needed, but keep the intent):\n' +
+      '- Light theme — background: ' + tokens.bg + '; surface/card background: ' + tokens.surface + '; body text: ' + tokens.text + '; muted text: ' + tokens.textMuted + '; primary accent: ' + tokens.accent + '; secondary accent: ' + tokens.accent2 + '; header background: ' + tokens.headerBg + '; header text: ' + tokens.headerText + '; border: ' + tokens.border + '.\n' +
+      '- Dark theme — background: ' + tokens.darkBg + '; surface/card background: ' + tokens.darkSurface + '; body text: ' + tokens.darkText + '; primary accent: ' + tokens.darkAccent + '; header background: ' + tokens.darkHeaderBg + '.\n' +
+      '- Derive any additional shades you need (hover states, badge backgrounds, table header rows, callout borders) from these base tokens rather than introducing an unrelated palette, and confirm every text/background pairing meets the contrast ratios specified in the accessibility requirements below in BOTH themes.\n' +
+      '- Typography, spacing, card shadows, border-radius, and component patterns (analogy box, callout, flip cards, comparison tables, activity blocks, quiz blocks) should follow the same conventions as the course\'s existing lesson template — only the color tokens above should change.\n\n' +
+      '============================================================\n' +
+      'ACCESSIBILITY REQUIREMENTS (ADA / WCAG 2.2)\n' +
+      '============================================================\n' +
+      (adaLines || '(No specific accessibility requirements were selected — still follow general WCAG 2.2 AA best practice.)') + '\n\n' +
+      '============================================================\n' +
+      'EXTERNAL LINKS & EMBEDDED MEDIA\n' +
+      '============================================================\n' +
+      linksBlock + '\n\n' +
+      pdfsBlock + '\n\n' +
+      pngsBlock + '\n\n' +
+      '============================================================\n' +
+      'OUTPUT REQUIREMENTS\n' +
+      '============================================================\n' +
+      '- Output one complete, valid HTML document — nothing else.\n' +
+      '- Diagrams and illustrations you create yourself (not supplied above) should still be inline SVG rather than external image files. The PDF and PNG items listed above are the only external files this lesson should reference, and only by the filenames/URLs given.\n' +
+      '- No build step or external JS framework — plain HTML/CSS/vanilla JS only, so it runs as a static file straight out of the box.\n' +
+      '- Keep all interactive behavior (theme toggle, flip cards, quiz grading, mapping exercise, simulations) working with no network calls and no dependency on browser storage other than a single localStorage key for the theme preference (fall back gracefully if storage is unavailable).\n' +
+      '- This is a first AI-generated draft. A human subject-matter expert will review it for technical accuracy before it reaches students — do not claim the content has already been reviewed.' +
+      (extraNotes ? '\n\n============================================================\nADDITIONAL INSTRUCTIONS FROM THE INSTRUCTOR\n============================================================\n' + extraNotes + '\n' : '');
+
+    outputPrompt.value = prompt;
+    outputSection.classList.add('show');
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ============================================================
+     COPY / DOWNLOAD / PRINT
+  ============================================================ */
+  function copyPrompt() {
+    var text = outputPrompt.value;
+    var msg = document.getElementById('copyMsg');
+    function flash() {
+      msg.classList.add('show');
+      setTimeout(function () { msg.classList.remove('show'); }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash).catch(function () { fallbackCopy(flash); });
+    } else {
+      fallbackCopy(flash);
+    }
+  }
+
+  function fallbackCopy(cb) {
+    outputPrompt.focus();
+    outputPrompt.select();
+    try {
+      document.execCommand('copy');
+      cb();
+    } catch (e) { /* ignore */ }
+  }
+
+  function downloadPrompt() {
+    var text = outputPrompt.value;
+    if (!text) return;
+    var blob = new Blob([text], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var nameBase = lessonMode === 'existing'
+      ? LESSONS[Number(lessonSelect.value)].file.replace('.html', '')
+      : 'custom-lesson';
+    a.href = url;
+    a.download = nameBase + '-generation-prompt.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', generatePrompt);
+  document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+  document.getElementById('downloadBtn').addEventListener('click', downloadPrompt);
+  document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
+})();
+  </script>
+</body>
+</html>

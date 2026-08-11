@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Academic Prompt Architect — assemble ready-to-paste AI prompts for higher-ed professional and institutional writing." />
+  <title>Academic Prompt Architect · Prompt Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <style>
+    .subtype-block { display: none; margin-top: 0.75rem; }
+    .subtype-block.visible { display: block; }
+    .tone-wrap { display: grid; gap: 0.5rem; }
+    .tone-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .tone-labels span:last-child { text-align: right; }
+    .tone-current {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--teal);
+      margin-top: 0.15rem;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+    .char-count {
+      text-align: right;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+    .llm-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .llm-row select {
+      flex: 1 1 180px;
+      min-width: 0;
+    }
+    .required-note abbr { text-decoration: none; color: var(--coral); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">Prompt <span>Workshop</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="educator.html">Educator</a>
+        <a href="academic.html" aria-current="page">Academic</a>
+        <a href="lesson.html">Lesson</a>
+        <a href="graphics.html">Graphics</a>
+        <a href="cheatsheets.html">Cheatsheets</a>
+        <a href="activities.html">Activities</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="builder-shell">
+    <header class="builder-intro">
+      <span class="eyebrow">Professional writing</span>
+      <h1>Academic Prompt Architect</h1>
+      <p>
+        Assemble a structured prompt for higher-ed professional and institutional writing —
+        recommendations, grants, governance documents, advising notes, accreditation narratives, and more.
+        Copy the result into Claude, ChatGPT, Gemini, or another assistant, then review and revise before use.
+      </p>
+    </header>
+
+    <div class="builder-layout">
+      <div class="stack" id="formStack">
+
+        <!-- Examples -->
+        <section class="panel" aria-labelledby="examples-head">
+          <div class="panel-head">
+            <h2 id="examples-head">Quick start</h2>
+            <span class="hint">Load a sample</span>
+          </div>
+          <div class="panel-body">
+            <div class="example-grid" id="exampleGrid" role="list"></div>
+          </div>
+        </section>
+
+        <!-- Task category -->
+        <section class="panel" aria-labelledby="category-head">
+          <div class="panel-head">
+            <h2 id="category-head">Task category</h2>
+            <span class="hint">Required</span>
+          </div>
+          <div class="panel-body">
+            <p class="field-hint" style="margin-top:0;">Choose a broad category, then pick the specific task type.</p>
+            <div class="cat-grid" id="catGrid" role="group" aria-label="Task category"></div>
+            <div class="subtype-block" id="subtypeBlock">
+              <label class="field-label" for="subtypeSelect">Specific task type</label>
+              <select id="subtypeSelect" aria-label="Specific task type"></select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Role / persona -->
+        <section class="panel" aria-labelledby="persona-head">
+          <div class="panel-head">
+            <h2 id="persona-head">Your role</h2>
+            <span class="hint">Required</span>
+          </div>
+          <div class="panel-body">
+            <div class="persona-grid" id="personaGrid" role="radiogroup" aria-label="Your role or persona"></div>
+          </div>
+        </section>
+
+        <!-- Task description -->
+        <section class="panel" aria-labelledby="task-head">
+          <div class="panel-head">
+            <h2 id="task-head">Task description</h2>
+            <span class="hint">Required</span>
+          </div>
+          <div class="panel-body">
+            <label class="field-label" for="taskDesc">What do you need help with?</label>
+            <p class="field-hint">Be specific — include purpose, key points, deadlines, and anything the AI must address.</p>
+            <textarea id="taskDesc" rows="5" placeholder="Describe the writing task, context, and desired outcome…"></textarea>
+            <div class="char-count" id="taskCharCount" aria-live="polite">0 characters</div>
+          </div>
+        </section>
+
+        <!-- Audience -->
+        <section class="panel" aria-labelledby="audience-head">
+          <div class="panel-head">
+            <h2 id="audience-head">Audience</h2>
+            <span class="hint">Select all that apply</span>
+          </div>
+          <div class="panel-body">
+            <div class="audience-groups" id="audienceGroups"></div>
+          </div>
+        </section>
+
+        <!-- Optional context -->
+        <section class="panel" aria-labelledby="context-head">
+          <div class="panel-head">
+            <h2 id="context-head">Institutional context</h2>
+            <span class="hint">Optional</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <label class="field-label" for="instType">Institution type</label>
+              <select id="instType">
+                <option value="">— Select if relevant —</option>
+                <option value="Community college (2-year)">Community college (2-year)</option>
+                <option value="Liberal arts college (4-year)">Liberal arts college (4-year)</option>
+                <option value="Regional university">Regional university</option>
+                <option value="Research university (R1/R2)">Research university (R1/R2)</option>
+                <option value="HBCU / MSI / tribal college">HBCU / MSI / tribal college</option>
+                <option value="Technical / vocational college">Technical / vocational college</option>
+                <option value="Online-focused institution">Online-focused institution</option>
+                <option value="Graduate / professional school">Graduate / professional school</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="discipline">Discipline / field</label>
+              <input type="text" id="discipline" placeholder="e.g., Biology, Student Affairs, Institutional Research" />
+            </div>
+            <div>
+              <label class="field-label" for="constraints">Constraints &amp; requirements</label>
+              <p class="field-hint">Deadlines, word limits, policy references, formatting rules, or must-include points.</p>
+              <textarea id="constraints" rows="3" placeholder="Any non-negotiable requirements…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Output preferences -->
+        <section class="panel" aria-labelledby="output-prefs-head">
+          <div class="panel-head">
+            <h2 id="output-prefs-head">Output preferences</h2>
+          </div>
+          <div class="panel-body stack">
+
+            <div>
+              <span class="field-label">Target length</span>
+              <div class="seg" id="lengthSeg" role="group" aria-label="Target length"></div>
+            </div>
+
+            <div>
+              <span class="field-label">Format</span>
+              <p class="field-hint">Select all formats that apply.</p>
+              <div class="chip-grid" id="formatGrid" role="group" aria-label="Output format"></div>
+            </div>
+
+            <div>
+              <span class="field-label" id="tone-label">Tone &amp; register</span>
+              <div class="tone-wrap">
+                <input type="range" id="toneSlider" min="0" max="4" step="1" value="2" aria-labelledby="tone-label" aria-valuetext="Professional" />
+                <div class="tone-labels" aria-hidden="true">
+                  <span>Conversational &amp; Warm</span>
+                  <span>Formal &amp; Academic</span>
+                </div>
+                <div class="tone-current" id="toneDisplay">Professional</div>
+              </div>
+            </div>
+
+            <div>
+              <span class="field-label">AI behavior</span>
+              <div class="chip-grid" id="behaviorGrid" role="group" aria-label="AI behavior preferences"></div>
+            </div>
+
+            <div>
+              <span class="field-label">Sensitive considerations</span>
+              <div class="chip-grid" id="sensitiveGrid" role="group" aria-label="Sensitive considerations"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Materials -->
+        <section class="panel" aria-labelledby="materials-head">
+          <div class="panel-head">
+            <h2 id="materials-head">Supporting materials &amp; extras</h2>
+            <span class="hint">Optional</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <label class="field-label" for="materials">Supporting materials</label>
+              <p class="field-hint">Paste drafts, rubrics, data, position descriptions, or notes the AI should reference.</p>
+              <textarea id="materials" rows="4" placeholder="Paste existing content here…"></textarea>
+            </div>
+            <div>
+              <label class="field-label" for="extras">Anything else</label>
+              <textarea id="extras" rows="2" placeholder="Additional instructions for the AI…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <p class="required-note"><abbr title="required">*</abbr> Task category, role, and task description are required for a complete prompt.</p>
+      </div>
+
+      <!-- Output panel -->
+      <aside class="output-panel" aria-labelledby="output-head">
+        <section class="panel">
+          <div class="panel-head">
+            <h2 id="output-head">Your assembled prompt</h2>
+          </div>
+          <div class="panel-body">
+            <div class="llm-row">
+              <label class="field-label" for="llmSelect" style="margin:0;flex:0 0 auto;">Send to</label>
+              <select id="llmSelect" aria-label="Choose LLM platform">
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="chatgpt">ChatGPT (OpenAI)</option>
+                <option value="gemini">Gemini (Google)</option>
+                <option value="copilot">Copilot (Microsoft)</option>
+                <option value="perplexity">Perplexity</option>
+              </select>
+              <button type="button" class="btn btn-accent btn-sm" id="openLlmBtn">Open in LLM</button>
+            </div>
+
+            <div class="stats" aria-live="polite">
+              <span id="wordCount">0 words</span>
+              <span id="charCount">0 chars</span>
+              <span class="copy-toast" id="copyToast" role="status">Copied!</span>
+            </div>
+
+            <div class="output-box empty" id="outputBox" role="region" aria-live="polite" aria-label="Assembled prompt preview" tabindex="0">
+Select a task category, role, and task description to assemble your prompt →
+            </div>
+
+            <div class="output-actions">
+              <button type="button" class="btn btn-primary btn-sm" id="copyBtn">Copy prompt</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="downloadBtn">Download .txt</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="clearBtn">Clear all</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>Prompt Workshop</strong> · AI drafts need your review before institutional use</p>
+    <p style="margin-top:0.4rem;"><a href="../index.html">Home</a> · <a href="educator.html">Educator</a> · <a href="academic.html">Academic</a> · <a href="lesson.html">Lesson</a> · <a href="graphics.html">Graphics</a> · <a href="cheatsheets.html">Cheatsheets</a> · <a href="activities.html">Activities</a></p>
+  </footer>
+
+  <script>
+(function () {
+  'use strict';
+
+  /* ── Data ─────────────────────────────────────────────── */
+
+  const CATEGORIES = {
+    writing: {
+      label: 'Academic Writing & Documents',
+      subtypes: [
+        'Letter of Recommendation',
+        'Grant Proposal Narrative',
+        'Tenure & Promotion Narrative',
+        'Course Proposal',
+        'Policy Draft',
+        'Conference Abstract',
+        'Syllabus Statement or Policy Language',
+        'Teaching Philosophy Statement',
+        'Research Statement',
+        'Scholarship Nomination Letter',
+        'Academic Appeal Response',
+        'Department Memo or Brief'
+      ]
+    },
+    research: {
+      label: 'Research & Scholarship',
+      subtypes: [
+        'Literature Review Summary',
+        'Research Proposal Section',
+        'IRB Protocol Narrative',
+        'Data Management Plan',
+        'Conference Paper Draft',
+        'Peer Review Response Letter',
+        'Research Impact Statement',
+        'Annotated Bibliography Entry',
+        'Methods Section Draft',
+        'Funding Justification'
+      ]
+    },
+    review: {
+      label: 'Review & Evaluation',
+      subtypes: [
+        'Program Review Narrative',
+        'Peer Teaching Observation Summary',
+        'Student Work Evaluation',
+        'Grant Proposal Review',
+        'Manuscript Peer Review',
+        'Accreditation Self-Study Section',
+        'Annual Performance Review',
+        'Search Committee Evaluation',
+        'Portfolio Assessment Summary',
+        'Rubric-Based Feedback Draft'
+      ]
+    },
+    admin: {
+      label: 'Administration & Governance',
+      subtypes: [
+        'Senate Motion or Resolution',
+        'Committee Report',
+        'Strategic Plan Section',
+        'Budget Justification',
+        'Governance Briefing Memo',
+        'Accreditation Response Letter',
+        'Policy Revision Proposal',
+        'Meeting Agenda & Minutes',
+        'Task Force Charge Letter',
+        'Executive Summary for Leadership'
+      ]
+    },
+    advising: {
+      label: 'Student Advising & Support',
+      subtypes: [
+        'Advising Session Notes',
+        'Degree Plan Summary',
+        'Academic Probation Letter',
+        'Transfer Guidance Memo',
+        'Career Pathway Outline',
+        'Intervention Plan',
+        'Referral to Support Services',
+        'Graduation Checklist Communication',
+        'Appeal or Petition Guidance',
+        'Parent/Family Communication Draft'
+      ]
+    },
+    communications: {
+      label: 'Institutional Communications',
+      subtypes: [
+        'Campus Announcement',
+        'Faculty Newsletter Article',
+        'Crisis Communication Draft',
+        'Event Invitation',
+        'Website Copy',
+        'Social Media Post (Institutional)',
+        'Alumni Update',
+        'Press Release',
+        'Community Partnership Announcement',
+        'Internal FAQ Document'
+      ]
+    },
+    hr: {
+      label: 'HR & Personnel',
+      subtypes: [
+        'Job Posting',
+        'Search Committee Charge Letter',
+        'Offer Letter Draft',
+        'Performance Improvement Plan',
+        'Onboarding Checklist',
+        'Staff Appreciation Message',
+        'Policy FAQ for Employees',
+        'Exit Interview Summary',
+        'Position Description Revision',
+        'Workplace Accommodation Memo'
+      ]
+    },
+    data: {
+      label: 'Data, Assessment & Accreditation',
+      subtypes: [
+        'Assessment Report',
+        'Accreditation Evidence Narrative',
+        'Survey Results Summary',
+        'Enrollment Analysis Memo',
+        'KPI Dashboard Narrative',
+        'Outcomes Assessment Plan',
+        'Institutional Research Brief',
+        'Program-Level Data Story',
+        'Closing-the-Loop Report',
+        'Benchmark Comparison Summary'
+      ]
+    }
+  };
+
+  const PERSONAS = [
+    { id: 'faculty', label: 'Faculty / Instructor', desc: 'Full-time, adjunct, lecturer' },
+    { id: 'admin', label: 'Academic Administrator', desc: 'Chair, dean, director, coordinator' },
+    { id: 'advising', label: 'Advisor / Counselor', desc: 'Academic, career, personal counseling' },
+    { id: 'researcher', label: 'Researcher / Scholar', desc: 'PI, postdoc, research staff' },
+    { id: 'library', label: 'Librarian / Archivist', desc: 'Reference, instruction, archives' },
+    { id: 'student_affairs', label: 'Student Affairs', desc: 'Housing, wellness, student life, DEI' },
+    { id: 'it', label: 'IT / Instructional Tech', desc: 'LMS, tech support, ed-tech' },
+    { id: 'hr', label: 'HR / Staff Specialist', desc: 'HR, finance, marketing, comms' }
+  ];
+
+  const PERSONA_INTROS = {
+    faculty: 'Act as an experienced faculty member who writes clearly for academic and institutional audiences while preserving an authentic professional voice.',
+    admin: 'Act as a seasoned academic administrator familiar with governance, policy, accreditation, and institutional communication norms.',
+    advising: 'Act as a thoughtful academic advisor who communicates with clarity, empathy, and respect for student privacy and dignity.',
+    researcher: 'Act as a rigorous researcher and scholar who writes with precision, appropriate hedging, and discipline-specific conventions.',
+    library: 'Act as an academic librarian who bridges information literacy, scholarly communication, and institutional policy with clarity.',
+    student_affairs: 'Act as a student affairs professional who balances care, compliance, and clear institutional messaging.',
+    it: 'Act as an instructional technology and IT professional who translates technical concepts for diverse campus audiences.',
+    hr: 'Act as an HR and personnel specialist who drafts fair, compliant, and professionally neutral institutional language.'
+  };
+
+  const AUDIENCES = {
+    Internal: [
+      'Faculty colleagues',
+      'Department chair',
+      'Academic senate',
+      'College president or provost',
+      'Institutional review board (IRB)',
+      'Curriculum committee',
+      'Search committee',
+      'Assessment committee',
+      'Board of trustees',
+      'Staff and administration'
+    ],
+    Students: [
+      'Current students (general)',
+      'Individual student (private communication)',
+      'Student organizations / clubs',
+      'Graduating seniors / transfer students',
+      'At-risk or struggling students'
+    ],
+    External: [
+      'Granting agency / foundation',
+      'Accrediting body',
+      'Journal editor or reviewer',
+      'Transfer institution / 4-year university',
+      'Graduate school admissions',
+      'Employer or industry partner',
+      'Media / general public',
+      'Government / policy audience',
+      'Professional organization',
+      'Community partner'
+    ]
+  };
+
+  const LENGTHS = [
+    { id: 'none', label: 'No limit' },
+    { id: 'w250', label: '~250 words' },
+    { id: 'w500', label: '~500 words' },
+    { id: 'p12', label: '1–2 pages' },
+    { id: 'p23', label: '2–3 pages' }
+  ];
+
+  const FORMATS = [
+    { id: 'prose', label: 'Prose' },
+    { id: 'bulleted', label: 'Bulleted draft' },
+    { id: 'template', label: 'Fill-in template' },
+    { id: 'outline', label: 'Outline / structure' },
+    { id: 'checklist', label: 'Action checklist' },
+    { id: 'email', label: 'Email format' },
+    { id: 'memo', label: 'Memo format' },
+    { id: 'table', label: 'Table / matrix' },
+    { id: 'summary', label: 'Executive summary' }
+  ];
+
+  const TONE_LABELS = [
+    'Conversational & Warm',
+    'Approachable Professional',
+    'Professional',
+    'Formal',
+    'Formal & Academic'
+  ];
+
+  const BEHAVIORS = [
+    { id: 'draft_only', label: 'Draft only — I will edit' },
+    { id: 'multiple_versions', label: 'Give me 2–3 versions' },
+    { id: 'ask_first', label: 'Ask clarifying questions first' },
+    { id: 'iterate', label: 'Be ready to iterate' },
+    { id: 'think_step', label: 'Think step-by-step' },
+    { id: 'no_hallucinate', label: 'Flag any uncertainties' },
+    { id: 'concise', label: 'Be concise' },
+    { id: 'thorough', label: 'Be thorough' }
+  ];
+
+  const SENSITIVE = [
+    { id: 'ferpa', label: 'FERPA compliance' },
+    { id: 'hipaa', label: 'HIPAA-aware language' },
+    { id: 'dei', label: 'DEI-inclusive framing' },
+    { id: 'union', label: 'Union / collective bargaining context' },
+    { id: 'legal', label: 'Legally cautious language' },
+    { id: 'confidential', label: 'Treat as confidential' },
+    { id: 'accessibility', label: 'Accessibility-first language' },
+    { id: 'ai_disclosure', label: 'Include AI disclosure note' }
+  ];
+
+  const LLM_URLS = {
+    claude: 'https://claude.ai/new',
+    chatgpt: 'https://chatgpt.com/',
+    gemini: 'https://gemini.google.com/app',
+    copilot: 'https://copilot.microsoft.com/',
+    perplexity: 'https://www.perplexity.ai/'
+  };
+
+  const EXAMPLES = [
+    {
+      title: 'Grad school recommendation',
+      desc: 'Strong letter for a STEM applicant',
+      data: {
+        category: 'writing',
+        subtype: 'Letter of Recommendation',
+        persona: 'faculty',
+        taskDesc: 'Draft a letter of recommendation for a senior biology major applying to PhD programs in ecology. The student led a two-semester independent research project on pollinator diversity, presented at a regional conference, and served as a peer tutor. Highlight intellectual curiosity, research maturity, and collaborative skills. I am a tenured associate professor who supervised their research.',
+        audiences: ['Graduate school admissions'],
+        instType: 'Liberal arts college (4-year)',
+        discipline: 'Biology / Ecology',
+        constraints: 'One page maximum. Must follow our department\'s letter template structure: opening relationship, academic ability, research experience, personal qualities, strong closing endorsement.',
+        length: 'p12',
+        formats: ['prose'],
+        tone: 3,
+        behaviors: ['draft_only', 'no_hallucinate'],
+        sensitive: ['ferpa', 'ai_disclosure'],
+        materials: '',
+        extras: 'Do not invent specific course grades or awards — use bracketed placeholders where facts are missing.'
+      }
+    },
+    {
+      title: 'NSF broader impacts',
+      desc: 'Grant narrative section draft',
+      data: {
+        category: 'writing',
+        subtype: 'Grant Proposal Narrative',
+        persona: 'researcher',
+        taskDesc: 'Write the Broader Impacts section for an NSF proposal on community-based water quality monitoring. Our project partners with a local watershed association and community college to train citizen scientists and integrate findings into an introductory environmental science course.',
+        audiences: ['Granting agency / foundation', 'Community partner'],
+        instType: 'Community college (2-year)',
+        discipline: 'Environmental Science',
+        constraints: 'Target ~500 words. Align with NSF criteria: integration of research and education, broadening participation, and dissemination.',
+        length: 'w500',
+        formats: ['prose'],
+        tone: 4,
+        behaviors: ['draft_only', 'think_step', 'iterate', 'no_hallucinate'],
+        sensitive: ['dei'],
+        materials: 'Partner org: Clearwater Watershed Alliance (nonprofit). Course: ENV 101, ~24 students per term, 2 sections/year.',
+        extras: 'Suggest 2-3 measurable outcomes I can refine with my grants office.'
+      }
+    },
+    {
+      title: 'Senate curriculum motion',
+      desc: 'Governance document for faculty senate',
+      data: {
+        category: 'admin',
+        subtype: 'Senate Motion or Resolution',
+        persona: 'admin',
+        taskDesc: 'Draft a senate motion to approve a new interdisciplinary General Education outcome on information literacy and AI literacy, effective Fall 2027. The Curriculum Committee has already approved the outcome language; senate needs a formal motion, rationale, and implementation timeline.',
+        audiences: ['Academic senate', 'Curriculum committee', 'Faculty colleagues'],
+        instType: 'Regional university',
+        discipline: 'General Education / Curriculum',
+        constraints: 'Follow Robert\'s Rules style. Include: whereas clauses, resolved clauses, effective date, and review date (3 years).',
+        length: 'p12',
+        formats: ['prose', 'outline'],
+        tone: 3,
+        behaviors: ['draft_only', 'ask_first'],
+        sensitive: ['legal', 'ai_disclosure'],
+        materials: 'Proposed outcome: "Graduates will evaluate information sources critically, use AI tools responsibly, and attribute intellectual work appropriately."',
+        extras: 'Include a brief implementation note for the registrar and assessment office.'
+      }
+    },
+    {
+      title: 'Accreditation evidence narrative',
+      desc: 'Assessment & accreditation writing',
+      data: {
+        category: 'data',
+        subtype: 'Accreditation Evidence Narrative',
+        persona: 'admin',
+        taskDesc: 'Write a narrative evidence section demonstrating how our nursing program uses direct and indirect assessment data to improve student learning outcomes, for our HLC accreditation self-study Standard 4.',
+        audiences: ['Accrediting body', 'Assessment committee', 'College president or provost'],
+        instType: 'Community college (2-year)',
+        discipline: 'Nursing / Health Sciences',
+        constraints: '750–1000 words. Reference closing-the-loop cycle. Avoid student identifiers.',
+        length: 'p12',
+        formats: ['prose', 'summary'],
+        tone: 4,
+        behaviors: ['thorough', 'no_hallucinate', 'draft_only'],
+        sensitive: ['ferpa', 'confidential'],
+        materials: '2023-24 NCLEX pass rate: 91%. Capstone OSCE rubric avg improved from 3.1 to 3.6 (4-pt scale) after curriculum map revision.',
+        extras: 'Use assessment terminology appropriate for HLC Standard 4.'
+      }
+    }
+  ];
+
+  /* ── State ─────────────────────────────────────────────── */
+
+  let state = {
+    category: '',
+    subtype: '',
+    persona: '',
+    audiences: new Set(),
+    length: 'none',
+    formats: new Set(),
+    behaviors: new Set(),
+    sensitive: new Set()
+  };
+
+  /* ── DOM refs ─────────────────────────────────────────── */
+
+  const catGrid = document.getElementById('catGrid');
+  const subtypeBlock = document.getElementById('subtypeBlock');
+  const subtypeSelect = document.getElementById('subtypeSelect');
+  const personaGrid = document.getElementById('personaGrid');
+  const audienceGroups = document.getElementById('audienceGroups');
+  const lengthSeg = document.getElementById('lengthSeg');
+  const formatGrid = document.getElementById('formatGrid');
+  const behaviorGrid = document.getElementById('behaviorGrid');
+  const sensitiveGrid = document.getElementById('sensitiveGrid');
+  const taskDesc = document.getElementById('taskDesc');
+  const taskCharCount = document.getElementById('taskCharCount');
+  const toneSlider = document.getElementById('toneSlider');
+  const toneDisplay = document.getElementById('toneDisplay');
+  const outputBox = document.getElementById('outputBox');
+  const wordCount = document.getElementById('wordCount');
+  const charCount = document.getElementById('charCount');
+  const copyToast = document.getElementById('copyToast');
+  const exampleGrid = document.getElementById('exampleGrid');
+
+  /* ── Render helpers ─────────────────────────────────────── */
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  }
+
+  function renderCategories() {
+    catGrid.innerHTML = Object.entries(CATEGORIES).map(([id, cat]) =>
+      `<button type="button" class="cat-btn" data-cat="${id}" aria-pressed="false">${cat.label}</button>`
+    ).join('');
+  }
+
+  function renderPersonas() {
+    personaGrid.innerHTML = PERSONAS.map(p =>
+      `<button type="button" class="persona-btn" data-persona="${p.id}" role="radio" aria-checked="false">
+        <strong>${p.label}</strong>
+        <span>${p.desc}</span>
+      </button>`
+    ).join('');
+  }
+
+  function renderAudiences() {
+    audienceGroups.innerHTML = Object.entries(AUDIENCES).map(([group, items]) => `
+      <div class="audience-group">
+        <h4>${group}</h4>
+        <div class="chip-grid" role="group" aria-label="${group} audience">
+          ${items.map(a => {
+            const id = slugify(a);
+            return `<button type="button" class="chip" data-audience="${a}" data-aud-id="${id}" aria-pressed="false">${a}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderLengthSeg() {
+    lengthSeg.innerHTML = LENGTHS.map((l, i) =>
+      `<button type="button" class="${i === 0 ? 'active' : ''}" data-length="${l.id}" aria-pressed="${i === 0 ? 'true' : 'false'}">${l.label}</button>`
+    ).join('');
+  }
+
+  function renderChipGroup(container, items, attr, labelKey) {
+    container.innerHTML = items.map(item => {
+      const id = item.id;
+      const label = item[labelKey];
+      return `<button type="button" class="chip" data-${attr}="${id}" aria-pressed="false">${label}</button>`;
+    }).join('');
+  }
+
+  function renderExamples() {
+    exampleGrid.innerHTML = EXAMPLES.map((ex, i) =>
+      `<button type="button" class="example-btn" data-example="${i}" role="listitem">
+        <strong>${ex.title}</strong>
+        <span>${ex.desc}</span>
+      </button>`
+    ).join('');
+  }
+
+  /* ── Category / subtype ─────────────────────────────────── */
+
+  function selectCategory(catId) {
+    state.category = catId;
+    catGrid.querySelectorAll('.cat-btn').forEach(btn => {
+      const active = btn.dataset.cat === catId;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    const cat = CATEGORIES[catId];
+    subtypeSelect.innerHTML = cat.subtypes.map(s =>
+      `<option value="${s}">${s}</option>`
+    ).join('');
+    state.subtype = cat.subtypes[0];
+    subtypeBlock.classList.add('visible');
+    updatePrompt();
+  }
+
+  /* ── Persona ────────────────────────────────────────────── */
+
+  function selectPersona(id) {
+    state.persona = id;
+    personaGrid.querySelectorAll('.persona-btn').forEach(btn => {
+      const active = btn.dataset.persona === id;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+    updatePrompt();
+  }
+
+  /* ── Toggle sets ────────────────────────────────────────── */
+
+  function toggleChip(btn, set, keyAttr, onChange) {
+    const val = btn.dataset[keyAttr];
+    if (set.has(val)) {
+      set.delete(val);
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    } else {
+      set.add(val);
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+    }
+    if (onChange) onChange();
+    else updatePrompt();
+  }
+
+  function setChips(container, attr, values) {
+    container.querySelectorAll('.chip').forEach(btn => {
+      const active = values.includes(btn.dataset[attr]);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function selectLength(id) {
+    state.length = id;
+    lengthSeg.querySelectorAll('button').forEach(btn => {
+      const active = btn.dataset.length === id;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    updatePrompt();
+  }
+
+  /* ── Prompt assembly ────────────────────────────────────── */
+
+  function getLengthLabel() {
+    const item = LENGTHS.find(l => l.id === state.length);
+    return item ? item.label : 'No limit';
+  }
+
+  function getSelectedLabels(container, attr, catalog) {
+    const ids = Array.from(container.querySelectorAll('.chip.active')).map(b => b.dataset[attr]);
+    if (!catalog) return ids;
+    return ids.map(id => {
+      const item = catalog.find(c => c.id === id);
+      return item ? item.label : id;
+    });
+  }
+
+  function assemblePrompt() {
+    const parts = [];
+
+    if (state.persona && PERSONA_INTROS[state.persona]) {
+      parts.push(PERSONA_INTROS[state.persona]);
+      parts.push('');
+    }
+
+    if (state.category && state.subtype) {
+      const catLabel = CATEGORIES[state.category].label;
+      parts.push(`TASK: ${state.subtype} [${catLabel}]`);
+      parts.push('');
+    }
+
+    const desc = taskDesc.value.trim();
+    if (desc) {
+      parts.push(desc);
+      parts.push('');
+    }
+
+    const audienceBtns = audienceGroups.querySelectorAll('.chip.active');
+    if (audienceBtns.length) {
+      parts.push('AUDIENCE: ' + Array.from(audienceBtns).map(b => b.dataset.audience).join('; '));
+    }
+
+    const inst = document.getElementById('instType').value;
+    if (inst) parts.push('INSTITUTION TYPE: ' + inst);
+
+    const disc = document.getElementById('discipline').value.trim();
+    if (disc) parts.push('DISCIPLINE / FIELD: ' + disc);
+
+    const constraints = document.getElementById('constraints').value.trim();
+    if (constraints) {
+      parts.push('');
+      parts.push('CONSTRAINTS & REQUIREMENTS:');
+      parts.push(constraints);
+    }
+
+    parts.push('');
+    parts.push('LENGTH TARGET: ' + getLengthLabel());
+
+    const formatLabels = getSelectedLabels(formatGrid, 'format', FORMATS);
+    if (formatLabels.length) {
+      parts.push('FORMAT: ' + formatLabels.join('; '));
+    }
+
+    const toneIdx = parseInt(toneSlider.value, 10);
+    parts.push('TONE: ' + TONE_LABELS[toneIdx]);
+
+    const behaviorLabels = getSelectedLabels(behaviorGrid, 'behavior', BEHAVIORS);
+    if (behaviorLabels.length) {
+      parts.push('AI BEHAVIOR: ' + behaviorLabels.join('; '));
+    }
+
+    const sensitiveLabels = getSelectedLabels(sensitiveGrid, 'sensitive', SENSITIVE);
+    if (sensitiveLabels.length) {
+      parts.push('SENSITIVE CONSIDERATIONS: ' + sensitiveLabels.join('; '));
+    }
+
+    const materials = document.getElementById('materials').value.trim();
+    if (materials) {
+      parts.push('');
+      parts.push('SUPPORTING MATERIALS:');
+      parts.push(materials);
+    }
+
+    const extras = document.getElementById('extras').value.trim();
+    if (extras) {
+      parts.push('');
+      parts.push('ADDITIONAL INSTRUCTIONS:');
+      parts.push(extras);
+    }
+
+    if (parts.length && state.persona) {
+      parts.push('');
+      parts.push('---');
+      parts.push('Review all output for accuracy, institutional policy compliance, and appropriate voice before use. Replace any bracketed placeholders with verified facts.');
+    }
+
+    return parts.join('\n').trim();
+  }
+
+  function countWords(text) {
+    if (!text.trim()) return 0;
+    return text.trim().split(/\s+/).length;
+  }
+
+  function updatePrompt() {
+    state.subtype = subtypeSelect.value || state.subtype;
+    const text = assemblePrompt();
+    const hasMinimum = state.category && state.persona && taskDesc.value.trim();
+
+    outputBox.textContent = text || 'Select a task category, role, and task description to assemble your prompt →';
+    outputBox.classList.toggle('empty', !text || !hasMinimum);
+
+    wordCount.textContent = countWords(text) + ' words';
+    charCount.textContent = text.length + ' chars';
+
+    taskCharCount.textContent = taskDesc.value.length + ' character' + (taskDesc.value.length === 1 ? '' : 's');
+  }
+
+  /* ── Load example ───────────────────────────────────────── */
+
+  function loadExample(index) {
+    const ex = EXAMPLES[index];
+    if (!ex) return;
+    const d = ex.data;
+
+    selectCategory(d.category);
+    subtypeSelect.value = d.subtype;
+    state.subtype = d.subtype;
+
+    selectPersona(d.persona);
+
+    state.audiences = new Set(d.audiences || []);
+    audienceGroups.querySelectorAll('.chip').forEach(btn => {
+      const active = state.audiences.has(btn.dataset.audience);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    document.getElementById('instType').value = d.instType || '';
+    document.getElementById('discipline').value = d.discipline || '';
+    document.getElementById('constraints').value = d.constraints || '';
+    taskDesc.value = d.taskDesc || '';
+    document.getElementById('materials').value = d.materials || '';
+    document.getElementById('extras').value = d.extras || '';
+
+    selectLength(d.length || 'none');
+
+    state.formats = new Set(d.formats || []);
+    setChips(formatGrid, 'format', d.formats || []);
+
+    state.behaviors = new Set(d.behaviors || []);
+    setChips(behaviorGrid, 'behavior', d.behaviors || []);
+
+    state.sensitive = new Set(d.sensitive || []);
+    setChips(sensitiveGrid, 'sensitive', d.sensitive || []);
+
+    toneSlider.value = d.tone != null ? d.tone : 2;
+    toneDisplay.textContent = TONE_LABELS[parseInt(toneSlider.value, 10)];
+    toneSlider.setAttribute('aria-valuetext', toneDisplay.textContent);
+
+    updatePrompt();
+    taskDesc.focus();
+  }
+
+  /* ── Copy / download / clear ────────────────────────────── */
+
+  function getPromptText() {
+    return assemblePrompt();
+  }
+
+  function flashCopyToast() {
+    copyToast.classList.add('show');
+    setTimeout(() => copyToast.classList.remove('show'), 1800);
+  }
+
+  function copyText(text, cb) {
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(cb).catch(() => fallbackCopy(text, cb));
+    } else {
+      fallbackCopy(text, cb);
+    }
+  }
+
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      if (cb) cb();
+    } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+  }
+
+  function copyPrompt() {
+    const text = getPromptText();
+    if (!text) return;
+    copyText(text, flashCopyToast);
+  }
+
+  function downloadPrompt() {
+    const text = getPromptText();
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const slug = state.subtype ? slugify(state.subtype).slice(0, 40) : 'academic-prompt';
+    a.href = url;
+    a.download = slug + '-prompt.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAll() {
+    state = {
+      category: '',
+      subtype: '',
+      persona: '',
+      audiences: new Set(),
+      length: 'none',
+      formats: new Set(),
+      behaviors: new Set(),
+      sensitive: new Set()
+    };
+
+    catGrid.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    personaGrid.querySelectorAll('.persona-btn').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-checked', 'false');
+    });
+    subtypeBlock.classList.remove('visible');
+    subtypeSelect.innerHTML = '';
+
+    audienceGroups.querySelectorAll('.chip').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    formatGrid.querySelectorAll('.chip').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    behaviorGrid.querySelectorAll('.chip').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    sensitiveGrid.querySelectorAll('.chip').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+
+    selectLength('none');
+    taskDesc.value = '';
+    document.getElementById('instType').value = '';
+    document.getElementById('discipline').value = '';
+    document.getElementById('constraints').value = '';
+    document.getElementById('materials').value = '';
+    document.getElementById('extras').value = '';
+    toneSlider.value = 2;
+    toneDisplay.textContent = TONE_LABELS[2];
+    toneSlider.setAttribute('aria-valuetext', TONE_LABELS[2]);
+
+    updatePrompt();
+  }
+
+  function openInLlm() {
+    const text = getPromptText();
+    if (!text) return;
+    const key = document.getElementById('llmSelect').value;
+    const url = LLM_URLS[key] || LLM_URLS.claude;
+    copyText(text, () => {
+      flashCopyToast();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  /* ── Init & events ──────────────────────────────────────── */
+
+  renderCategories();
+  renderPersonas();
+  renderAudiences();
+  renderLengthSeg();
+  renderChipGroup(formatGrid, FORMATS, 'format', 'label');
+  renderChipGroup(behaviorGrid, BEHAVIORS, 'behavior', 'label');
+  renderChipGroup(sensitiveGrid, SENSITIVE, 'sensitive', 'label');
+  renderExamples();
+
+  catGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.cat-btn');
+    if (btn) selectCategory(btn.dataset.cat);
+  });
+
+  personaGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.persona-btn');
+    if (btn) selectPersona(btn.dataset.persona);
+  });
+
+  audienceGroups.addEventListener('click', e => {
+    const btn = e.target.closest('.chip[data-audience]');
+    if (btn) toggleChip(btn, state.audiences, 'audience');
+  });
+
+  lengthSeg.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-length]');
+    if (btn) selectLength(btn.dataset.length);
+  });
+
+  formatGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.chip[data-format]');
+    if (btn) toggleChip(btn, state.formats, 'format');
+  });
+
+  behaviorGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.chip[data-behavior]');
+    if (btn) toggleChip(btn, state.behaviors, 'behavior');
+  });
+
+  sensitiveGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.chip[data-sensitive]');
+    if (btn) toggleChip(btn, state.sensitive, 'sensitive');
+  });
+
+  subtypeSelect.addEventListener('change', updatePrompt);
+
+  taskDesc.addEventListener('input', updatePrompt);
+  document.getElementById('instType').addEventListener('change', updatePrompt);
+  document.getElementById('discipline').addEventListener('input', updatePrompt);
+  document.getElementById('constraints').addEventListener('input', updatePrompt);
+  document.getElementById('materials').addEventListener('input', updatePrompt);
+  document.getElementById('extras').addEventListener('input', updatePrompt);
+
+  toneSlider.addEventListener('input', () => {
+    toneDisplay.textContent = TONE_LABELS[parseInt(toneSlider.value, 10)];
+    toneSlider.setAttribute('aria-valuetext', toneDisplay.textContent);
+    updatePrompt();
+  });
+
+  exampleGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.example-btn');
+    if (btn) loadExample(parseInt(btn.dataset.example, 10));
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+  document.getElementById('downloadBtn').addEventListener('click', downloadPrompt);
+  document.getElementById('clearBtn').addEventListener('click', clearAll);
+  document.getElementById('openLlmBtn').addEventListener('click', openInLlm);
+
+  updatePrompt();
+})();
+  </script>
+</body>
+</html>
