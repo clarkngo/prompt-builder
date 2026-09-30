@@ -13,6 +13,8 @@ Static site of interactive **prompt builders** for educators — ready to deploy
 | Graphics | [`builders/graphics.html`](builders/graphics.html) | Prompts for instructional diagrams, flowcharts, and classroom visuals |
 | Cheatsheets | [`builders/cheatsheets.html`](builders/cheatsheets.html) | Prompts for glossaries, term tables, and quick-reference handouts |
 | Activities | [`builders/activities.html`](builders/activities.html) | Prompts for labs, simulations, discussions, and classroom exercises |
+| Capstone | [`builders/capstone.html`](builders/capstone.html) | Prompts for scoping team or individual capstone projects |
+| Term Project | [`builders/term-project.html`](builders/term-project.html) | Prompts for course term projects, with course presets (e.g. AI 410), milestones, rubric, and backlog |
 
 ## Local preview
 
