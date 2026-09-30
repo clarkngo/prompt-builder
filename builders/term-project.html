@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Team/Term Project Builder — scope a course term project against its required components, milestones, and rubric, then generate a project brief, backlog & sprint plan, and team synthesis." />
+  <title>Team/Term Project Builder · Prompt Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/site.css" />
+  <style>
+    .mode-section { display: none; }
+    .mode-section.show { display: block; }
+    input[type="range"] { width: 100%; accent-color: var(--teal); cursor: pointer; }
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .level-value { font-weight: 800; color: var(--teal); font-size: 0.86rem; text-align: right; }
+    .level-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .level-desc {
+      margin-top: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      line-height: 1.45;
+    }
+    .field-label small { font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0; }
+    .edit-list > * + * { margin-top: 0.5rem; }
+    .edit-row {
+      display: grid;
+      gap: 0.45rem;
+      align-items: start;
+    }
+    .edit-row.cols-component { grid-template-columns: minmax(0, 1fr) auto; }
+    .edit-row.cols-milestone { grid-template-columns: 4.5rem minmax(0, 1fr) auto; }
+    .edit-row.cols-rubric { grid-template-columns: minmax(0, 1fr) 4.5rem auto; }
+    .edit-row .rubric-desc { grid-column: 1 / -1; }
+    .edit-row.cols-rubric + .edit-row.cols-rubric {
+      border-top: 1px dashed var(--line);
+      padding-top: 0.5rem;
+    }
+    .remove-btn {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 10px;
+      font: inherit;
+      font-weight: 800;
+      width: 2.3rem;
+      height: 2.3rem;
+      cursor: pointer;
+    }
+    .remove-btn:hover { border-color: var(--coral, #d9634c); color: var(--ink); }
+    .list-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.65rem;
+    }
+    .weight-total { font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+    .weight-total.off { color: #b4462f; }
+    .preset-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.45rem; }
+    .roster-form {
+      border: 1.5px dashed var(--line);
+      border-radius: 12px;
+      padding: 0.85rem 0.9rem;
+      margin-top: 0.75rem;
+    }
+    .roster-form .stack > * + * { margin-top: 0.75rem; }
+    .roster-card {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      margin-top: 0.65rem;
+      background: #fff;
+    }
+    .roster-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .roster-card-head strong { font-size: 0.92rem; color: var(--ink); }
+    .roster-role-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--teal);
+      background: var(--teal-soft);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+    }
+    .roster-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem 0.9rem;
+      margin-top: 0.45rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .roster-notes {
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      font-style: italic;
+    }
+    .roster-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .roster-empty {
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0.4rem 0.1rem 0;
+    }
+    .output-target-seg { margin-bottom: 0.85rem; }
+    #methodSeg, #outputTargetBlock { border-radius: 14px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-name">Prompt <span>Workshop</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="educator.html">Educator</a>
+        <a href="academic.html">Academic</a>
+        <a href="lesson.html">Lesson</a>
+        <a href="graphics.html">Graphics</a>
+        <a href="cheatsheets.html">Cheatsheets</a>
+        <a href="activities.html">Activities</a>
+        <a href="capstone.html">Capstone</a>
+        <a href="term-project.html" aria-current="page">Term Project</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="builder-shell">
+    <div class="builder-intro">
+      <span class="eyebrow">Course projects</span>
+      <h1>Team/Term Project Builder</h1>
+      <p>
+        Scope a course term project — solo or as a team — against what the course actually requires: the components
+        it must combine, the milestone calendar, the rubric, and the way you're expected to work. Start from a course
+        preset or fill in your own, then generate a project brief, a backlog &amp; sprint plan, per-member prompts,
+        and a team synthesis.
+      </p>
+    </div>
+
+    <div class="builder-layout">
+      <div class="stack" id="formPanels">
+
+        <!-- Course context -->
+        <section class="panel" aria-labelledby="course-heading">
+          <div class="panel-head">
+            <h2 id="course-heading">Course context</h2>
+            <span class="hint">What the course expects</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <label class="field-label" for="presetSelect">Start from a preset</label>
+              <select id="presetSelect"></select>
+              <p class="preset-note" id="presetNote"></p>
+            </div>
+            <div class="row">
+              <div>
+                <label class="field-label" for="courseName">Course name</label>
+                <input type="text" id="courseName" placeholder="e.g., CS 350: Software Engineering" autocomplete="off" />
+              </div>
+              <div>
+                <label class="field-label" for="projectWeight">Project weight <small>(% of grade)</small></label>
+                <input type="number" id="projectWeight" min="0" max="100" step="1" />
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="courseFocus">Course focus <small>(what the project should showcase)</small></label>
+              <textarea id="courseFocus" rows="2" placeholder="e.g., Apply the full-stack patterns from this term in one working app…"></textarea>
+            </div>
+            <div class="row">
+              <div>
+                <div class="level-header">
+                  <span class="field-label" style="margin:0;">Course length</span>
+                  <span class="level-value" id="courseWeeksValue"></span>
+                </div>
+                <input type="range" id="courseWeeksSlider" min="4" max="16" step="1" aria-label="Course length in weeks" />
+              </div>
+              <div>
+                <div class="level-header">
+                  <span class="field-label" style="margin:0;">Build window</span>
+                  <span class="level-value" id="buildWeeksValue"></span>
+                </div>
+                <input type="range" id="buildWeeksSlider" min="1" max="16" step="1" aria-label="Active build window in weeks" />
+              </div>
+            </div>
+            <p class="field-hint" style="margin-top:0;">Build window = weeks of focused building once scope is locked (often much shorter than the course).</p>
+            <div class="row">
+              <div>
+                <label class="field-label" for="teamSizeRule">Team size rule</label>
+                <input type="text" id="teamSizeRule" placeholder="e.g., Teams of 2–4, or solo" autocomplete="off" />
+              </div>
+              <div>
+                <label class="field-label" for="pmToolSelect">Project management tool</label>
+                <select id="pmToolSelect">
+                  <option>GitHub Projects</option>
+                  <option>Trello</option>
+                  <option>Notion</option>
+                  <option>Jira</option>
+                  <option>Linear</option>
+                  <option>Spreadsheet / doc</option>
+                  <option>Not decided</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <span class="field-label">Way of working</span>
+              <div class="seg" role="group" aria-label="Way of working" id="methodSeg"></div>
+              <div class="level-desc" id="methodDesc"></div>
+            </div>
+            <div>
+              <label class="field-label" for="aiPolicy">AI-use policy <small>(optional)</small></label>
+              <textarea id="aiPolicy" rows="2" placeholder="e.g., AI may scaffold code, but graded work is what you integrate, test, and explain."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Required components -->
+        <section class="panel" aria-labelledby="components-heading">
+          <div class="panel-head">
+            <h2 id="components-heading">Required components</h2>
+            <span class="hint">What must be combined</span>
+          </div>
+          <div class="panel-body">
+            <p class="field-hint" style="margin-top:0;">Skills, modules, or labs from the course that the project must integrate. Leave empty if the project is open-ended.</p>
+            <div class="edit-list" id="componentList"></div>
+            <div class="list-foot">
+              <button type="button" class="btn btn-secondary btn-sm" id="addComponentBtn">+ Add component</button>
+              <label class="chip" style="cursor:pointer;"><input type="checkbox" id="integrateAll" style="margin-right:0.35rem;" />All must work together end-to-end</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Milestones -->
+        <section class="panel" aria-labelledby="milestones-heading">
+          <div class="panel-head">
+            <h2 id="milestones-heading">Milestones</h2>
+            <span class="hint">Checkpoints by week</span>
+          </div>
+          <div class="panel-body">
+            <div class="edit-list" id="milestoneList"></div>
+            <div class="list-foot">
+              <button type="button" class="btn btn-secondary btn-sm" id="addMilestoneBtn">+ Add milestone</button>
+              <label class="field-label" style="margin:0;display:flex;align-items:center;gap:0.5rem;" for="currentWeek">
+                Current week
+                <input type="number" id="currentWeek" min="1" max="16" step="1" style="width:4.5rem;" />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Rubric -->
+        <section class="panel" aria-labelledby="rubric-heading">
+          <div class="panel-head">
+            <h2 id="rubric-heading">Grading rubric</h2>
+            <span class="hint">How it's evaluated</span>
+          </div>
+          <div class="panel-body">
+            <div class="edit-list" id="rubricList"></div>
+            <div class="list-foot">
+              <button type="button" class="btn btn-secondary btn-sm" id="addRubricBtn">+ Add criterion</button>
+              <span class="weight-total" id="rubricTotal"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Deliverable track -->
+        <section class="panel" aria-labelledby="track-heading">
+          <div class="panel-head">
+            <h2 id="track-heading">Deliverable track</h2>
+            <span class="hint">Choose output type</span>
+          </div>
+          <div class="panel-body">
+            <div class="mode-row" role="group" aria-label="Deliverable track">
+              <button type="button" class="mode-btn active" id="trackApplication">Build an Application</button>
+              <button type="button" class="mode-btn" id="trackResearch">Conduct Research</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Team setup -->
+        <section class="panel" aria-labelledby="team-heading">
+          <div class="panel-head">
+            <h2 id="team-heading">Who's working on this?</h2>
+            <span class="hint">Individual or team</span>
+          </div>
+          <div class="panel-body">
+            <div class="mode-row" role="group" aria-label="Team setup">
+              <button type="button" class="mode-btn active" id="teamIndividual">Individual</button>
+              <button type="button" class="mode-btn" id="teamTeam">Team</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Domain & problem -->
+        <section class="panel" aria-labelledby="domain-heading">
+          <div class="panel-head">
+            <h2 id="domain-heading">Domain &amp; problem</h2>
+            <span class="hint">Where and what</span>
+          </div>
+          <div class="panel-body stack">
+            <div class="row">
+              <div>
+                <label class="field-label" for="domainSelect">Domain / industry</label>
+                <select id="domainSelect"></select>
+              </div>
+              <div>
+                <label class="field-label" for="subIndustrySelect">Sub-industry</label>
+                <select id="subIndustrySelect"></select>
+              </div>
+            </div>
+            <div>
+              <span class="field-label">Problem framing</span>
+              <div class="seg" role="group" aria-label="Problem framing" id="framingSeg">
+                <button type="button" data-value="existing" class="active">Improve an existing solution</button>
+                <button type="button" data-value="emerging">Address a new/emerging problem</button>
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="problemStatement">Project idea / problem statement <small>(optional — leave blank and ask the AI to propose one)</small></label>
+              <textarea id="problemStatement" rows="3" placeholder="e.g., A study-buddy app that answers questions from course notes and pings you before deadlines…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Complexity & scope -->
+        <section class="panel" aria-labelledby="complexity-heading">
+          <div class="panel-head">
+            <h2 id="complexity-heading">Complexity &amp; scope</h2>
+            <span class="hint">How hard, how much</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Problem complexity</span>
+                <span class="level-value" id="complexityValue"></span>
+              </div>
+              <input type="range" id="complexitySlider" min="0" max="4" step="1" aria-label="Problem complexity" />
+              <div class="level-ticks"><span>Well-defined</span><span>Frontier</span></div>
+              <div class="level-desc" id="complexityDesc"></div>
+            </div>
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Target scope</span>
+                <span class="level-value" id="scopeValue"></span>
+              </div>
+              <input type="range" id="scopeSlider" min="0" max="4" step="1" aria-label="Target scope" />
+              <div class="level-ticks"><span>Minimal</span><span>Maximal</span></div>
+              <div class="level-desc" id="scopeDesc"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Constraints -->
+        <section class="panel" aria-labelledby="constraints-heading">
+          <div class="panel-head">
+            <h2 id="constraints-heading">Limitations &amp; constraints</h2>
+            <span class="hint">What's actually in the way</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Constraint pressure</span>
+                <span class="level-value" id="pressureValue"></span>
+              </div>
+              <input type="range" id="pressureSlider" min="0" max="4" step="1" aria-label="Constraint pressure" />
+              <div class="level-ticks"><span>Minimal</span><span>Severe</span></div>
+              <div class="level-desc" id="pressureDesc"></div>
+            </div>
+            <div>
+              <span class="field-label">Constraint types</span>
+              <div class="chip-grid" id="constraintGrid" role="group" aria-label="Constraint types"></div>
+            </div>
+            <div>
+              <label class="field-label" for="additionalConstraints">Additional constraints</label>
+              <textarea id="additionalConstraints" rows="2" placeholder="Anything else limiting what's achievable…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Individual profile -->
+        <section class="panel mode-section show" id="profileSection" aria-labelledby="profile-heading">
+          <div class="panel-head">
+            <h2 id="profile-heading">Your experience</h2>
+            <span class="hint">Calibrate the guidance</span>
+          </div>
+          <div class="panel-body stack">
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Domain experience</span>
+                <span class="level-value" id="profileDomainValue"></span>
+              </div>
+              <input type="range" id="profileDomainSlider" min="0" max="4" step="1" aria-label="Your domain experience" />
+              <div class="level-desc" id="profileDomainDesc"></div>
+            </div>
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Technical / tooling experience</span>
+                <span class="level-value" id="profileTechValue"></span>
+              </div>
+              <input type="range" id="profileTechSlider" min="0" max="4" step="1" aria-label="Your technical experience" />
+              <div class="level-desc" id="profileTechDesc"></div>
+            </div>
+            <div>
+              <div class="level-header">
+                <span class="field-label" style="margin:0;">Availability</span>
+                <span class="level-value" id="profileAvailabilityValue"></span>
+              </div>
+              <input type="range" id="profileAvailabilitySlider" min="2" max="40" step="1" aria-label="Your weekly availability" />
+            </div>
+            <div>
+              <label class="field-label" for="profileNotes">Notes <small>(strengths, concerns, prior related work)</small></label>
+              <textarea id="profileNotes" rows="2"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Team roster -->
+        <section class="panel mode-section" id="rosterSection" aria-labelledby="roster-heading">
+          <div class="panel-head">
+            <h2 id="roster-heading">Team roster</h2>
+            <span class="hint">Add each member</span>
+          </div>
+          <div class="panel-body">
+            <p class="field-hint">Add every team member. Each gets their own prompt to copy or download — then use the Backlog and Team Synthesis tabs in the output panel.</p>
+            <div class="roster-form">
+              <div class="stack">
+                <div class="row">
+                  <div>
+                    <label class="field-label" for="nmName">Name</label>
+                    <input type="text" id="nmName" placeholder="e.g., Priya" autocomplete="off" />
+                  </div>
+                  <div>
+                    <label class="field-label" for="nmRole">Role / track</label>
+                    <select id="nmRole">
+                      <option>Scrum lead / PM</option>
+                      <option>Frontend / Mobile</option>
+                      <option>Backend</option>
+                      <option>Data / ML / AI</option>
+                      <option>Research</option>
+                      <option>Design / UX</option>
+                      <option>QA / Testing</option>
+                      <option>DevOps / Infra</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="field-label" for="nmComponents">Owns components <small>(optional)</small></label>
+                  <input type="text" id="nmComponents" placeholder="e.g., RAG pipeline, push notifications" autocomplete="off" />
+                </div>
+                <div>
+                  <div class="level-header">
+                    <span class="field-label" style="margin:0;">Domain experience</span>
+                    <span class="level-value" id="nmDomainValue"></span>
+                  </div>
+                  <input type="range" id="nmDomainSlider" min="0" max="4" step="1" value="2" aria-label="Member domain experience" />
+                  <div class="level-desc" id="nmDomainDesc"></div>
+                </div>
+                <div>
+                  <div class="level-header">
+                    <span class="field-label" style="margin:0;">Technical / tooling experience</span>
+                    <span class="level-value" id="nmTechValue"></span>
+                  </div>
+                  <input type="range" id="nmTechSlider" min="0" max="4" step="1" value="2" aria-label="Member technical experience" />
+                  <div class="level-desc" id="nmTechDesc"></div>
+                </div>
+                <div>
+                  <div class="level-header">
+                    <span class="field-label" style="margin:0;">Availability</span>
+                    <span class="level-value" id="nmAvailabilityValue">10 hrs/week</span>
+                  </div>
+                  <input type="range" id="nmAvailabilitySlider" min="2" max="40" step="1" value="10" aria-label="Member weekly availability" />
+                </div>
+                <div>
+                  <label class="field-label" for="nmNotes">Notes <small>(optional)</small></label>
+                  <textarea id="nmNotes" rows="2"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="addMemberBtn">Add to roster</button>
+              </div>
+            </div>
+            <div id="rosterList"></div>
+          </div>
+        </section>
+
+        <!-- Additional context -->
+        <section class="panel" aria-labelledby="extra-heading">
+          <div class="panel-head">
+            <h2 id="extra-heading">Additional context</h2>
+          </div>
+          <div class="panel-body">
+            <label class="field-label" for="additional">Additional context</label>
+            <textarea id="additional" rows="3" placeholder="Required stack, presentation format, instructor feedback so far, etc."></textarea>
+          </div>
+        </section>
+      </div>
+
+      <!-- Output -->
+      <aside class="panel output-panel" aria-labelledby="output-heading">
+        <div class="panel-head">
+          <h2 id="output-heading">Live prompt</h2>
+          <span class="hint">Updates as you build</span>
+        </div>
+        <div class="panel-body">
+          <div class="seg output-target-seg" id="outputTargetBlock" role="group" aria-label="Prompt to generate">
+            <button type="button" class="active" data-target="brief">Project Brief</button>
+            <button type="button" data-target="backlog">Backlog &amp; Sprints</button>
+            <button type="button" data-target="synthesis" id="synthesisTab">Team Synthesis</button>
+          </div>
+          <div class="stats">
+            <span id="charCount">0 characters</span>
+            <span id="wordCount">0 words</span>
+          </div>
+          <div class="output-box" id="outputBox" role="region" aria-live="polite" aria-label="Generated prompt" tabindex="0"></div>
+          <div class="output-actions">
+            <button type="button" class="btn btn-accent btn-sm" id="copyBtn">Copy</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="downloadBtn">Download</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="clearBtn">Clear</button>
+            <span class="copy-toast" id="copyToast" aria-live="polite">Copied!</span>
+            <div class="llm-row">
+              <label for="llmSelect" class="field-label" style="margin:0;">Open in</label>
+              <select id="llmSelect" aria-label="Choose LLM destination">
+                <option value="claude">Claude</option>
+                <option value="chatgpt">ChatGPT</option>
+                <option value="gemini">Gemini</option>
+                <option value="copilot">Copilot</option>
+              </select>
+              <button type="button" class="btn btn-primary btn-sm" id="openLlmBtn">Open in LLM</button>
+            </div>
+          </div>
+          <p class="required-note">The prompt helps you plan — your instructor's syllabus and feedback always win over the AI's suggestions.</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong>Prompt Workshop</strong> · Team/Term Project Builder</p>
+    <p style="margin-top:0.4rem;"><a href="../index.html">Home</a> · <a href="educator.html">Educator</a> · <a href="academic.html">Academic</a> · <a href="lesson.html">Lesson</a> · <a href="graphics.html">Graphics</a> · <a href="cheatsheets.html">Cheatsheets</a> · <a href="activities.html">Activities</a> · <a href="capstone.html">Capstone</a> · <a href="https://github.com/clarkngo/prompt-builder" target="_blank" rel="noopener noreferrer">GitHub ↗</a></p>
+  </footer>
+
+  <script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'promptWorkshop.termProject.v1';
+
+  // Course presets. Add a new course by appending an entry here; "generic" is the blank-slate default.
+  var PRESETS = [
+    {
+      id: 'generic',
+      label: 'Generic term project',
+      note: 'A neutral starting point — edit every field to match your syllabus.',
+      course: {
+        courseName: '',
+        courseFocus: '',
+        projectWeight: 20,
+        courseWeeks: 10,
+        buildWeeks: 4,
+        teamSizeRule: 'Teams of 2–4, or individual',
+        method: 'scrum',
+        pmTool: 'GitHub Projects',
+        aiPolicy: '',
+        integrateAll: false,
+        components: [],
+        milestones: [
+          { week: 2, text: 'Team formed and project idea proposed' },
+          { week: 4, text: 'Scope and plan approved' },
+          { week: 7, text: 'Mid-term progress check / working slice' },
+          { week: 10, text: 'Final deliverable and presentation' }
+        ],
+        rubric: [
+          { name: 'Scope & design', weight: 25, desc: 'Problem is well-defined and the plan is realistic.' },
+          { name: 'Execution', weight: 35, desc: 'A working, demonstrable result.' },
+          { name: 'Presentation', weight: 25, desc: 'Clear demo and explanation of decisions.' },
+          { name: 'Collaboration / process', weight: 15, desc: 'Evidence of individual contribution (teams) or process reflection (solo).' }
+        ]
+      }
+    },
+    {
+      id: 'ai410',
+      label: 'AI 410: AI Engineering (Term Project)',
+      note: 'Combine all 4 HOS into one cohesive app. Idea due Wk 6, architecture Wk 8, scope locked Wk 9, live demo Wk 10.',
+      course: {
+        courseName: 'AI 410: AI Engineering',
+        courseFocus: 'Synthesize all four Hands-On Skills (HOS) from the term into one cohesive, working AI application.',
+        projectWeight: 20,
+        courseWeeks: 10,
+        buildWeeks: 2,
+        teamSizeRule: 'Team or individual — teams of 2–4 are typical, but not required',
+        method: 'scrum',
+        pmTool: 'GitHub Projects',
+        aiPolicy: 'Create/Scaffold is never graded on its own — AI-assisted scaffolding is the starting point, not the deliverable. Graded work is the integration, a working result, and your ability to explain it.',
+        integrateAll: true,
+        components: [
+          'HOS 1 — Agentic loop with tool calling',
+          'HOS 2 — Retrieval-augmented generation (RAG) with a vector database',
+          'HOS 3 — Guardrails / output validation and background (async) jobs',
+          'HOS 4 — Mobile client with push notifications and observability'
+        ],
+        milestones: [
+          { week: 1, text: 'Project introduced; begin ideating' },
+          { week: 6, text: 'Team formed (or solo confirmed) + one-paragraph idea naming which HOS pieces it combines' },
+          { week: 8, text: 'Architecture diagram and integration review' },
+          { week: 9, text: 'Scope locked as a short backlog of user stories; building starts' },
+          { week: 10, text: 'Feature-complete; all HOS pieces work together; live walkthrough demo' }
+        ],
+        rubric: [
+          { name: 'Synthesis & Scope', weight: 25, desc: 'How clearly the project’s use of all 4 HOS is defined.' },
+          { name: 'Execution', weight: 35, desc: 'A working, demonstrable result.' },
+          { name: 'Presentation', weight: 25, desc: 'Clarity of the Week 10 live demo.' },
+          { name: 'Collaboration', weight: 15, desc: 'Individual contribution (teams) or process reflection (solo).' }
+        ]
+      }
+    }
+  ];
+
+  var METHODS = [
+    { id: 'scrum', label: 'Scrum-lite', directive: 'Work from a product backlog of user stories, plan short sprints, assign roles if it’s a team, and hold async standups (or keep a personal daily log if solo).' },
+    { id: 'kanban', label: 'Kanban', directive: 'Pull work from a prioritized board (To do / Doing / Done) with a small work-in-progress limit; no fixed sprints.' },
+    { id: 'milestone', label: 'Milestone-based', directive: 'Plan backwards from the course milestones; each phase ends in a concrete, reviewable artifact.' },
+    { id: 'none', label: 'Not specified', directive: 'The course does not prescribe a process — recommend a lightweight one that fits the team and timeline.' }
+  ];
+
+  var DOMAINS = [
+    { id: 'open', label: 'Open / student-chosen', subs: ['Campus & student life', 'Personal productivity', 'Community or local organization', 'Developer tools', 'Other (describe in the idea)'] },
+    { id: 'healthcare', label: 'Healthcare & Life Sciences', subs: ['Clinical care & diagnostics', 'Mental & behavioral health', 'Health insurance & payers', 'Medical devices & wearables', 'Public health & epidemiology', 'Elder & home care', 'Pharma & drug discovery'] },
+    { id: 'fintech', label: 'Finance & Fintech', subs: ['Consumer banking & payments', 'Lending & credit', 'Wealth & investing', 'Insurance (insurtech)', 'Fraud & risk', 'Regulatory & compliance (regtech)', 'Crypto & digital assets'] },
+    { id: 'edtech', label: 'Education & EdTech', subs: ['K-12 learning tools', 'Higher ed & LMS', 'Corporate L&D / upskilling', 'Special education & accessibility', 'Test prep & credentialing', 'Tutoring & AI mentors'] },
+    { id: 'retail', label: 'Retail & E-commerce', subs: ['Online marketplaces', 'In-store retail tech', 'Supply chain visibility', 'Personalization & recommendations', 'Customer service & returns', 'Loyalty & payments'] },
+    { id: 'manufacturing', label: 'Manufacturing & Supply Chain', subs: ['Factory automation & IoT', 'Predictive maintenance', 'Quality control & inspection', 'Logistics & fleet routing', 'Inventory & demand planning', 'Sustainability & circular supply chains'] },
+    { id: 'agtech', label: 'Agriculture & AgTech', subs: ['Precision farming', 'Crop & yield monitoring', 'Livestock management', 'Food safety & traceability', 'Agri-fintech & insurance', 'Vertical / urban farming'] },
+    { id: 'energy', label: 'Energy & Sustainability', subs: ['Renewable generation', 'Grid & demand management', 'Carbon accounting', 'EV & battery tech', 'Climate risk analytics', 'Circular economy & waste'] },
+    { id: 'govtech', label: 'Government & Public Sector', subs: ['Citizen services & permitting', 'Public safety & emergency response', 'Civic transparency & data', 'Elections & voting infrastructure', 'Smart cities & infrastructure', 'Social services & benefits'] },
+    { id: 'media', label: 'Media & Entertainment', subs: ['Streaming & content discovery', 'Gaming & interactive media', 'Creator tools & monetization', 'News & misinformation', 'Sports analytics', 'Advertising & audience measurement'] },
+    { id: 'logistics', label: 'Transportation & Logistics', subs: ['Last-mile delivery', 'Freight & fleet management', 'Ride-hailing & mobility', 'Warehouse automation', 'Aviation & maritime ops', 'Autonomous vehicles'] },
+    { id: 'nonprofit', label: 'Nonprofit & Social Impact', subs: ['Disaster relief & humanitarian aid', 'Poverty & financial inclusion', 'Refugee & immigration services', 'Environmental conservation', 'Volunteer & donor management', 'Community health outreach'] },
+    { id: 'cybersecurity', label: 'Cybersecurity', subs: ['Threat detection & response', 'Identity & access management', 'Application security', 'Privacy & data governance', 'Fraud & abuse prevention', 'Security awareness & training'] },
+    { id: 'hr', label: 'HR & Workforce', subs: ['Recruiting & hiring', 'Employee engagement & retention', 'Performance management', 'Payroll & benefits', 'Workforce planning & scheduling', 'DEI analytics'] },
+    { id: 'proptech', label: 'Real Estate & PropTech', subs: ['Property search & listings', 'Property management', 'Construction tech', 'Smart buildings & facilities', 'Real estate investing', 'Short-term rentals'] },
+    { id: 'legaltech', label: 'Legal & LegalTech', subs: ['Contract analysis & review', 'Legal research', 'Compliance & e-discovery', 'Access to justice', 'IP & patent management', 'Court & case management'] }
+  ];
+
+  var PROBLEM_FRAMING = {
+    existing: { label: 'Improve an existing solution', directive: 'Target a known, already-addressed problem. Articulate what existing solutions get wrong or leave out and how this project meaningfully improves on them rather than replicating them.' },
+    emerging: { label: 'Address a new/emerging problem', directive: 'Target a problem that is under-addressed or newly emerging. First establish that it is real and worth solving (evidence, affected users, why now) before proposing a solution.' }
+  };
+
+  var COMPLEXITY_LEVELS = [
+    { label: 'Well-defined', directive: 'A known problem type with established patterns to follow; ambiguity is low and reference examples exist.' },
+    { label: 'Moderate', directive: 'Some unknowns, but the work is mostly integrating or adapting existing tools, data, and approaches.' },
+    { label: 'Complex', directive: 'Multiple interacting components or stakeholders; expect real unknowns that require iteration.' },
+    { label: 'Highly complex', directive: 'Significant technical or research risk; few playbooks apply directly — expect to prototype, fail, and revise.' },
+    { label: 'Frontier', directive: 'Borders on an open research question. Expect pivots, and build in explicit re-scoping checkpoints.' }
+  ];
+
+  var APP_SCOPE_LEVELS = [
+    { label: 'Proof-of-concept sketch', directive: 'A minimal, possibly hard-coded demo that shows the core idea works.' },
+    { label: 'Focused MVP', directive: 'One primary user flow works end-to-end with real (if limited) data; everything else is explicitly out of scope.' },
+    { label: 'Full-featured prototype', directive: 'Multiple flows work together with reasonable error handling; demo-ready but not hardened for production.' },
+    { label: 'Pilot-ready system', directive: 'Stable enough for a small group of real users, with basic monitoring and a feedback plan.' },
+    { label: 'Production-grade system', directive: 'Meets production expectations for reliability, security, and scale — a very high bar for a term project.' }
+  ];
+
+  var RESEARCH_SCOPE_LEVELS = [
+    { label: 'Literature scan', directive: 'Summarize and synthesize existing work; no original data collection required.' },
+    { label: 'Focused study', directive: 'One narrow question with a small dataset or limited experiment; conclusions are provisional.' },
+    { label: 'Comprehensive study', directive: 'A well-designed methodology, adequate data, and honest discussion of limitations.' },
+    { label: 'Publishable-quality paper', directive: 'The rigor expected of a workshop or conference submission.' },
+    { label: 'Novel research contribution', directive: 'A genuinely new finding, method, or dataset — ambitious for a term project.' }
+  ];
+
+  var CONSTRAINT_PRESSURE_LEVELS = [
+    { label: 'Minimal constraints', directive: 'The team has largely what it needs; constraints should not shape scope decisions.' },
+    { label: 'Light constraints', directive: 'A few limitations with workarounds available; note them without letting them drive the plan.' },
+    { label: 'Moderate constraints', directive: 'Constraints will shape some decisions (tooling, data access, or timeline); plan around them explicitly.' },
+    { label: 'Heavy constraints', directive: 'Constraints materially limit what is achievable; actively descope or sequence around them.' },
+    { label: 'Severe constraints', directive: 'One or more hard blockers exist; flag whether the project as framed is feasible at all.' }
+  ];
+
+  var EXPERIENCE_LEVELS = [
+    { label: 'New to this', directive: 'No prior exposure — plan a learning ramp and prefer well-documented, mainstream tools.' },
+    { label: 'Some familiarity', directive: 'Coursework or light exposure only — will lean on tutorials, examples, and close guidance.' },
+    { label: 'Working knowledge', directive: 'Has applied this in at least one prior project — independent on familiar patterns, needs support on edge cases.' },
+    { label: 'Experienced', directive: 'Comfortable working independently, including debugging and design decisions.' },
+    { label: 'Deep expertise', directive: 'Could mentor others; has professional or advanced academic experience to draw on.' }
+  ];
+
+  var CONSTRAINT_TYPES = [
+    { id: 'budget', label: 'Budget', directive: 'Little or no money for paid tools, APIs, data, or infrastructure.' },
+    { id: 'api-limits', label: 'API / free-tier limits', directive: 'Relying on free tiers or rate-limited APIs (LLM, hosting, push, database) that cap usage.' },
+    { id: 'compute', label: 'Compute / infra', directive: 'Limited compute, hosting, or infrastructure.' },
+    { id: 'data-access', label: 'Data access', directive: 'Needed data is hard to obtain, incomplete, sensitive, or licensed.' },
+    { id: 'tooling', label: 'Tooling / licenses', directive: 'Required software, platforms, devices, or licenses are unavailable or restricted.' },
+    { id: 'team-availability', label: 'Team availability', directive: 'Members have limited hours due to other courses, jobs, or commitments.' },
+    { id: 'short-window', label: 'Short build window', directive: 'Most of the building happens in a compressed window at the end of the term.' },
+    { id: 'integration', label: 'Integration risk', directive: 'Separately built pieces must work together, and integration issues surface late.' },
+    { id: 'regulatory', label: 'Privacy / compliance', directive: 'The domain carries privacy, safety, or regulatory requirements that constrain what can be built or tested.' },
+    { id: 'stakeholder-access', label: 'User access', directive: 'Limited access to real users or stakeholders for feedback.' }
+  ];
+
+  var LLM_URLS = {
+    claude: 'https://claude.ai/new',
+    chatgpt: 'https://chatgpt.com/',
+    gemini: 'https://gemini.google.com/app',
+    copilot: 'https://copilot.microsoft.com/'
+  };
+
+  function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+  function defaultState() {
+    var s = {
+      preset: 'generic',
+      currentWeek: 1,
+      track: 'application',
+      teamMode: 'individual',
+      domain: 'open',
+      subIndustry: DOMAINS[0].subs[0],
+      problemFraming: 'existing',
+      problemStatement: '',
+      complexity: 2,
+      scope: 1,
+      constraintPressure: 2,
+      constraintTypes: ['team-availability', 'short-window'],
+      additionalConstraints: '',
+      profileDomainExp: 2,
+      profileTechExp: 2,
+      profileAvailability: 10,
+      profileNotes: '',
+      roster: [],
+      additional: '',
+      outputTarget: 'brief'
+    };
+    var course = clone(PRESETS[0].course);
+    Object.keys(course).forEach(function (k) { s[k] = course[k]; });
+    return s;
+  }
+
+  var state = defaultState();
+  var els = {};
+  var restoring = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  function saveState() {
+    if (restoring) return;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      Object.keys(saved).forEach(function (key) {
+        if (Object.prototype.hasOwnProperty.call(state, key)) state[key] = saved[key];
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function changed() {
+    saveState();
+    renderOutput();
+  }
+
+  function domainObj() {
+    return DOMAINS.filter(function (d) { return d.id === state.domain; })[0] || DOMAINS[0];
+  }
+  function methodObj() {
+    return METHODS.filter(function (m) { return m.id === state.method; })[0] || METHODS[METHODS.length - 1];
+  }
+  function scopeLevels() {
+    return state.track === 'research' ? RESEARCH_SCOPE_LEVELS : APP_SCOPE_LEVELS;
+  }
+  function slug(text) {
+    return (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  function components() {
+    return state.components.map(function (c) { return c.trim(); }).filter(Boolean);
+  }
+  function milestones() {
+    return state.milestones
+      .filter(function (m) { return (m.text || '').trim(); })
+      .slice()
+      .sort(function (a, b) { return (a.week || 0) - (b.week || 0); });
+  }
+  function rubric() {
+    return state.rubric.filter(function (r) { return (r.name || '').trim(); });
+  }
+  function courseLabel() {
+    return state.courseName.trim() || 'this course';
+  }
+
+  // ---- Sliders ----
+
+  function bindLevelSlider(sliderId, valueElId, descElId, levelsGetter, onChange) {
+    var slider = $(sliderId);
+    var valueEl = $(valueElId);
+    var descEl = $(descElId);
+    function render() {
+      var levels = levelsGetter();
+      var idx = Math.max(0, Math.min(levels.length - 1, parseInt(slider.value, 10)));
+      valueEl.textContent = levels[idx].label;
+      descEl.textContent = levels[idx].directive;
+      slider.setAttribute('aria-valuetext', levels[idx].label);
+    }
+    slider.addEventListener('input', function () {
+      onChange(parseInt(slider.value, 10));
+      render();
+      changed();
+    });
+    return { render: render };
+  }
+
+  function bindNumberSlider(sliderId, valueElId, key, suffix) {
+    var slider = $(sliderId);
+    slider.addEventListener('input', function () {
+      state[key] = parseInt(slider.value, 10);
+      $(valueElId).textContent = state[key] + suffix;
+      if (key === 'courseWeeks' && state.buildWeeks > state.courseWeeks) {
+        state.buildWeeks = state.courseWeeks;
+        $('buildWeeksSlider').value = state.buildWeeks;
+        $('buildWeeksValue').textContent = state.buildWeeks + ' weeks';
+      }
+      changed();
+    });
+  }
+
+  var levelCtls = {};
+  var nmDomainCtl, nmTechCtl;
+
+  function setupSliders() {
+    levelCtls.complexity = bindLevelSlider('complexitySlider', 'complexityValue', 'complexityDesc',
+      function () { return COMPLEXITY_LEVELS; }, function (v) { state.complexity = v; });
+    levelCtls.scope = bindLevelSlider('scopeSlider', 'scopeValue', 'scopeDesc',
+      scopeLevels, function (v) { state.scope = v; });
+    levelCtls.pressure = bindLevelSlider('pressureSlider', 'pressureValue', 'pressureDesc',
+      function () { return CONSTRAINT_PRESSURE_LEVELS; }, function (v) { state.constraintPressure = v; });
+    levelCtls.profileDomain = bindLevelSlider('profileDomainSlider', 'profileDomainValue', 'profileDomainDesc',
+      function () { return EXPERIENCE_LEVELS; }, function (v) { state.profileDomainExp = v; });
+    levelCtls.profileTech = bindLevelSlider('profileTechSlider', 'profileTechValue', 'profileTechDesc',
+      function () { return EXPERIENCE_LEVELS; }, function (v) { state.profileTechExp = v; });
+
+    nmDomainCtl = bindLevelSlider('nmDomainSlider', 'nmDomainValue', 'nmDomainDesc',
+      function () { return EXPERIENCE_LEVELS; }, function () {});
+    nmTechCtl = bindLevelSlider('nmTechSlider', 'nmTechValue', 'nmTechDesc',
+      function () { return EXPERIENCE_LEVELS; }, function () {});
+    nmDomainCtl.render();
+    nmTechCtl.render();
+
+    bindNumberSlider('courseWeeksSlider', 'courseWeeksValue', 'courseWeeks', ' weeks');
+    bindNumberSlider('buildWeeksSlider', 'buildWeeksValue', 'buildWeeks', ' weeks');
+    bindNumberSlider('profileAvailabilitySlider', 'profileAvailabilityValue', 'profileAvailability', ' hrs/week');
+
+    var nmAvailSlider = $('nmAvailabilitySlider');
+    nmAvailSlider.addEventListener('input', function () {
+      $('nmAvailabilityValue').textContent = nmAvailSlider.value + ' hrs/week';
+    });
+  }
+
+  // ---- Presets & course context ----
+
+  function renderPresetSelect() {
+    var sel = $('presetSelect');
+    sel.innerHTML = '';
+    PRESETS.forEach(function (p) {
+      var opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.label;
+      sel.appendChild(opt);
+    });
+    var custom = document.createElement('option');
+    custom.value = 'custom';
+    custom.textContent = 'Custom (edited)';
+    sel.appendChild(custom);
+    sel.value = state.preset;
+    var preset = PRESETS.filter(function (p) { return p.id === state.preset; })[0];
+    $('presetNote').textContent = preset ? preset.note : 'Course fields have been edited from their preset.';
+  }
+
+  function applyPreset(id) {
+    var preset = PRESETS.filter(function (p) { return p.id === id; })[0];
+    if (!preset) return;
+    var course = clone(preset.course);
+    Object.keys(course).forEach(function (k) { state[k] = course[k]; });
+    state.preset = id;
+    saveState();
+    syncFormFromState();
+  }
+
+  function markCustom() {
+    if (state.preset === 'custom') return;
+    state.preset = 'custom';
+    renderPresetSelect();
+  }
+
+  function renderMethodSeg() {
+    var seg = $('methodSeg');
+    seg.innerHTML = '';
+    METHODS.forEach(function (m) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = m.label;
+      btn.className = m.id === state.method ? 'active' : '';
+      btn.addEventListener('click', function () {
+        state.method = m.id;
+        markCustom();
+        renderMethodSeg();
+        changed();
+      });
+      seg.appendChild(btn);
+    });
+    $('methodDesc').textContent = methodObj().directive;
+  }
+
+  // ---- Editable lists (components, milestones, rubric) ----
+
+  function textInput(value, placeholder, label, onInput) {
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.value = value;
+    input.placeholder = placeholder;
+    input.setAttribute('aria-label', label);
+    input.autocomplete = 'off';
+    input.addEventListener('input', function () { onInput(input.value); markCustom(); changed(); });
+    return input;
+  }
+
+  function numberInput(value, min, max, label, onInput) {
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.min = min;
+    input.max = max;
+    input.value = value;
+    input.setAttribute('aria-label', label);
+    input.addEventListener('input', function () { onInput(parseInt(input.value, 10) || 0); markCustom(); changed(); });
+    return input;
+  }
+
+  function removeButton(label, onRemove) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'remove-btn';
+    btn.textContent = '×';
+    btn.setAttribute('aria-label', label);
+    btn.addEventListener('click', function () { onRemove(); markCustom(); renderLists(); changed(); });
+    return btn;
+  }
+
+  function emptyNote(text) {
+    var p = document.createElement('p');
+    p.className = 'roster-empty';
+    p.textContent = text;
+    return p;
+  }
+
+  function renderComponents() {
+    var list = $('componentList');
+    list.innerHTML = '';
+    if (!state.components.length) list.appendChild(emptyNote('No required components — the project is open-ended.'));
+    state.components.forEach(function (c, i) {
+      var row = document.createElement('div');
+      row.className = 'edit-row cols-component';
+      row.appendChild(textInput(c, 'e.g., Auth + user accounts', 'Component ' + (i + 1), function (v) { state.components[i] = v; }));
+      row.appendChild(removeButton('Remove component ' + (i + 1), function () { state.components.splice(i, 1); }));
+      list.appendChild(row);
+    });
+  }
+
+  function renderMilestones() {
+    var list = $('milestoneList');
+    list.innerHTML = '';
+    if (!state.milestones.length) list.appendChild(emptyNote('No milestones yet.'));
+    state.milestones.forEach(function (m, i) {
+      var row = document.createElement('div');
+      row.className = 'edit-row cols-milestone';
+      row.appendChild(numberInput(m.week, 1, 16, 'Milestone ' + (i + 1) + ' week', function (v) { state.milestones[i].week = v; }));
+      row.appendChild(textInput(m.text, 'What is due / reviewed', 'Milestone ' + (i + 1) + ' description', function (v) { state.milestones[i].text = v; }));
+      row.appendChild(removeButton('Remove milestone ' + (i + 1), function () { state.milestones.splice(i, 1); }));
+      list.appendChild(row);
+    });
+  }
+
+  function renderRubricTotal() {
+    var total = state.rubric.reduce(function (sum, r) { return sum + (r.weight || 0); }, 0);
+    var el = $('rubricTotal');
+    el.textContent = state.rubric.length ? 'Total: ' + total + '%' + (total !== 100 ? ' (should be 100%)' : '') : '';
+    el.classList.toggle('off', state.rubric.length > 0 && total !== 100);
+  }
+
+  function renderRubric() {
+    var list = $('rubricList');
+    list.innerHTML = '';
+    if (!state.rubric.length) list.appendChild(emptyNote('No rubric criteria yet.'));
+    state.rubric.forEach(function (r, i) {
+      var row = document.createElement('div');
+      row.className = 'edit-row cols-rubric';
+      row.appendChild(textInput(r.name, 'Criterion', 'Criterion ' + (i + 1) + ' name', function (v) { state.rubric[i].name = v; }));
+      row.appendChild(numberInput(r.weight, 0, 100, 'Criterion ' + (i + 1) + ' weight', function (v) { state.rubric[i].weight = v; renderRubricTotal(); }));
+      row.appendChild(removeButton('Remove criterion ' + (i + 1), function () { state.rubric.splice(i, 1); }));
+      var desc = textInput(r.desc, 'What earns full credit', 'Criterion ' + (i + 1) + ' description', function (v) { state.rubric[i].desc = v; });
+      desc.className = 'rubric-desc';
+      row.appendChild(desc);
+      list.appendChild(row);
+    });
+    renderRubricTotal();
+  }
+
+  function renderLists() {
+    renderComponents();
+    renderMilestones();
+    renderRubric();
+  }
+
+  // ---- Domain / sub-industry ----
+
+  function renderDomainSelect() {
+    els.domainSelect.innerHTML = '';
+    DOMAINS.forEach(function (d) {
+      var opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = d.label;
+      els.domainSelect.appendChild(opt);
+    });
+    els.domainSelect.value = state.domain;
+  }
+
+  function renderSubIndustrySelect() {
+    var domain = domainObj();
+    els.subIndustrySelect.innerHTML = '';
+    domain.subs.forEach(function (s) {
+      var opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      els.subIndustrySelect.appendChild(opt);
+    });
+    if (domain.subs.indexOf(state.subIndustry) < 0) state.subIndustry = domain.subs[0];
+    els.subIndustrySelect.value = state.subIndustry;
+  }
+
+  // ---- Constraint chips ----
+
+  function renderConstraintGrid() {
+    var grid = $('constraintGrid');
+    grid.innerHTML = '';
+    CONSTRAINT_TYPES.forEach(function (item) {
+      var on = state.constraintTypes.indexOf(item.id) >= 0;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip' + (on ? ' active' : '');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.textContent = item.label;
+      btn.addEventListener('click', function () {
+        var idx = state.constraintTypes.indexOf(item.id);
+        if (idx >= 0) state.constraintTypes.splice(idx, 1);
+        else state.constraintTypes.push(item.id);
+        renderConstraintGrid();
+        changed();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  // ---- Mode toggles ----
+
+  function setTrack(track) {
+    state.track = track;
+    $('trackApplication').classList.toggle('active', track === 'application');
+    $('trackResearch').classList.toggle('active', track === 'research');
+    levelCtls.scope.render();
+    changed();
+  }
+
+  function setTeamMode(mode) {
+    state.teamMode = mode;
+    $('teamIndividual').classList.toggle('active', mode === 'individual');
+    $('teamTeam').classList.toggle('active', mode === 'team');
+    $('profileSection').classList.toggle('show', mode === 'individual');
+    $('rosterSection').classList.toggle('show', mode === 'team');
+    $('synthesisTab').style.display = mode === 'team' ? '' : 'none';
+    if (mode === 'individual' && state.outputTarget === 'synthesis') state.outputTarget = 'brief';
+    setOutputTarget(state.outputTarget);
+  }
+
+  function setFraming(value) {
+    state.problemFraming = value;
+    document.querySelectorAll('#framingSeg button').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-value') === value);
+    });
+    changed();
+  }
+
+  function setOutputTarget(target) {
+    state.outputTarget = target;
+    document.querySelectorAll('#outputTargetBlock button').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-target') === target);
+    });
+    changed();
+  }
+
+  // ---- Roster ----
+
+  function renderRoster() {
+    els.rosterList.innerHTML = '';
+    if (!state.roster.length) {
+      els.rosterList.appendChild(emptyNote('No team members added yet.'));
+      return;
+    }
+    state.roster.forEach(function (m) {
+      var card = document.createElement('div');
+      card.className = 'roster-card';
+
+      var head = document.createElement('div');
+      head.className = 'roster-card-head';
+      var name = document.createElement('strong');
+      name.textContent = m.name;
+      var badge = document.createElement('span');
+      badge.className = 'roster-role-badge';
+      badge.textContent = m.role;
+      head.appendChild(name);
+      head.appendChild(badge);
+      card.appendChild(head);
+
+      var meta = document.createElement('div');
+      meta.className = 'roster-meta';
+      [
+        'Domain: ' + EXPERIENCE_LEVELS[m.domainExp].label,
+        'Tech: ' + EXPERIENCE_LEVELS[m.techExp].label,
+        m.availability + ' hrs/week'
+      ].concat(m.owns ? ['Owns: ' + m.owns] : []).forEach(function (t) {
+        var span = document.createElement('span');
+        span.textContent = t;
+        meta.appendChild(span);
+      });
+      card.appendChild(meta);
+
+      if (m.notes) {
+        var notes = document.createElement('div');
+        notes.className = 'roster-notes';
+        notes.textContent = m.notes;
+        card.appendChild(notes);
+      }
+
+      var actions = document.createElement('div');
+      actions.className = 'roster-actions';
+
+      var copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'btn btn-accent btn-sm';
+      copyBtn.textContent = 'Copy prompt';
+      copyBtn.addEventListener('click', function () {
+        copyText(buildMemberPrompt(m.id));
+        flashLabel(copyBtn, 'Copied!');
+      });
+
+      var downloadBtn = document.createElement('button');
+      downloadBtn.type = 'button';
+      downloadBtn.className = 'btn btn-secondary btn-sm';
+      downloadBtn.textContent = 'Download prompt';
+      downloadBtn.addEventListener('click', function () {
+        downloadText(buildMemberPrompt(m.id), slug(m.name || 'member') + '-term-project-prompt.txt');
+        flashLabel(downloadBtn, 'Saved!');
+      });
+
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn btn-ghost btn-sm';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', function () {
+        state.roster = state.roster.filter(function (x) { return x.id !== m.id; });
+        renderRoster();
+        changed();
+      });
+
+      actions.appendChild(copyBtn);
+      actions.appendChild(downloadBtn);
+      actions.appendChild(removeBtn);
+      card.appendChild(actions);
+
+      els.rosterList.appendChild(card);
+    });
+  }
+
+  function flashLabel(btn, text) {
+    var original = btn.textContent;
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = original; }, 1400);
+  }
+
+  function addMember() {
+    var name = $('nmName').value.trim();
+    if (!name) { $('nmName').focus(); return; }
+    state.roster.push({
+      id: 'm' + Date.now() + Math.floor(Math.random() * 1000),
+      name: name,
+      role: $('nmRole').value,
+      owns: $('nmComponents').value.trim(),
+      domainExp: parseInt($('nmDomainSlider').value, 10),
+      techExp: parseInt($('nmTechSlider').value, 10),
+      availability: parseInt($('nmAvailabilitySlider').value, 10),
+      notes: $('nmNotes').value.trim()
+    });
+    renderRoster();
+    changed();
+
+    $('nmName').value = '';
+    $('nmNotes').value = '';
+    $('nmComponents').value = '';
+    $('nmRole').selectedIndex = 0;
+    $('nmDomainSlider').value = 2;
+    $('nmTechSlider').value = 2;
+    $('nmAvailabilitySlider').value = 10;
+    nmDomainCtl.render();
+    nmTechCtl.render();
+    $('nmAvailabilityValue').textContent = '10 hrs/week';
+  }
+
+  // ---- Prompt builders ----
+
+  function trackNoun() { return state.track === 'research' ? 'research project' : 'application'; }
+
+  function courseLines() {
+    var lines = [];
+    var m = methodObj();
+    lines.push('- **Course:** ' + (state.courseName.trim() || 'Not specified'));
+    if (state.courseFocus.trim()) lines.push('- **Course focus:** ' + state.courseFocus.trim());
+    lines.push('- **Course length:** ' + state.courseWeeks + ' weeks; we are currently in **week ' + state.currentWeek + '**.');
+    lines.push('- **Active build window:** ' + state.buildWeeks + ' week(s) of focused building once scope is locked.');
+    lines.push('- **Project weight:** ' + state.projectWeight + '% of the final grade.');
+    lines.push('- **Team size rule:** ' + (state.teamSizeRule.trim() || 'Not specified'));
+    lines.push('- **Way of working:** ' + m.label + ' — ' + m.directive);
+    lines.push('- **Project management tool:** ' + state.pmTool);
+    if (state.aiPolicy.trim()) lines.push('- **AI-use policy:** ' + state.aiPolicy.trim());
+    return lines;
+  }
+
+  function componentLines() {
+    var list = components();
+    if (!list.length) return ['- None prescribed — the project is open-ended within the course topic.'];
+    var lines = list.map(function (c, i) { return (i + 1) + '. ' + c; });
+    if (state.integrateAll) {
+      lines.push('');
+      lines.push('**All of these must be integrated end-to-end in one cohesive project** — not built as separate demos. The design should make each component’s role obvious and show how data or control flows between them.');
+    }
+    return lines;
+  }
+
+  function milestoneLines() {
+    var list = milestones();
+    if (!list.length) return ['- No milestones specified.'];
+    return list.map(function (m) {
+      var tag = m.week < state.currentWeek ? ' _(past)_' : (m.week === state.currentWeek ? ' _(this week)_' : '');
+      return '- **Week ' + m.week + ':** ' + m.text.trim() + tag;
+    });
+  }
+
+  function rubricLines() {
+    var list = rubric();
+    if (!list.length) return ['- No rubric specified.'];
+    var lines = ['| Criterion | Weight | What earns credit |', '|---|---|---|'];
+    list.forEach(function (r) {
+      lines.push('| ' + r.name.trim() + ' | ' + (r.weight || 0) + '% | ' + ((r.desc || '').trim() || '—') + ' |');
+    });
+    return lines;
+  }
+
+  function projectLines(condensed) {
+    var domain = domainObj();
+    var framing = PROBLEM_FRAMING[state.problemFraming];
+    var complexity = COMPLEXITY_LEVELS[state.complexity];
+    var scope = scopeLevels()[state.scope];
+    var pressure = CONSTRAINT_PRESSURE_LEVELS[state.constraintPressure];
+    var selected = CONSTRAINT_TYPES.filter(function (c) { return state.constraintTypes.indexOf(c.id) >= 0; });
+    var lines = [];
+
+    if (condensed) {
+      lines.push('- **Course:** ' + courseLabel() + ' (' + state.courseWeeks + ' weeks, now week ' + state.currentWeek + '; ' + state.projectWeight + '% of grade)');
+      lines.push('- **Track:** ' + (state.track === 'research' ? 'Conduct Research' : 'Build an Application'));
+      lines.push('- **Domain:** ' + domain.label + ' — ' + state.subIndustry);
+      lines.push('- **Project idea:** ' + (state.problemStatement.trim() || 'Not yet finalized.'));
+      if (components().length) lines.push('- **Required components' + (state.integrateAll ? ' (all integrated)' : '') + ':** ' + components().join('; '));
+      lines.push('- **Milestones:** ' + (milestones().map(function (m) { return 'Wk ' + m.week + ' ' + m.text.trim(); }).join(' → ') || 'None specified'));
+      lines.push('- **Complexity / scope:** ' + complexity.label + ' / ' + scope.label + '; build window ' + state.buildWeeks + ' week(s)');
+      lines.push('- **Way of working:** ' + methodObj().label + ' in ' + state.pmTool);
+      lines.push('- **Constraints:** ' + pressure.label + (selected.length ? ' (' + selected.map(function (c) { return c.label; }).join(', ') + ')' : ''));
+      if (state.additionalConstraints.trim()) lines.push('- **Additional constraints:** ' + state.additionalConstraints.trim());
+      if (state.additional.trim()) lines.push('- **Additional context:** ' + state.additional.trim());
+      return lines;
+    }
+
+    lines.push('- **Domain:** ' + domain.label + ' — ' + state.subIndustry);
+    lines.push('- **Problem type:** ' + framing.label + ' — ' + framing.directive);
+    lines.push('- **Project idea / problem statement:** ' + (state.problemStatement.trim() ||
+      'Not yet defined. Before anything else, propose 2–3 candidate project ideas that fit this domain, the framing, and every required component, and recommend one.'));
+    lines.push('- **Problem complexity:** ' + complexity.label + ' — ' + complexity.directive);
+    lines.push('- **Target scope:** ' + scope.label + ' — ' + scope.directive);
+    lines.push('');
+    lines.push('## CONSTRAINTS');
+    lines.push('- **Constraint pressure:** ' + pressure.label + ' — ' + pressure.directive);
+    selected.forEach(function (c) { lines.push('- **' + c.label + ':** ' + c.directive); });
+    lines.push('- **Additional constraints:** ' + (state.additionalConstraints.trim() || 'None specified.'));
+    if (state.additional.trim()) {
+      lines.push('');
+      lines.push('## ADDITIONAL CONTEXT');
+      lines.push(state.additional.trim());
+    }
+    return lines;
+  }
+
+  function rosterTable() {
+    var lines = ['| Name | Role | Owns | Domain exp. | Tech exp. | Availability | Notes |', '|---|---|---|---|---|---|---|'];
+    var total = 0;
+    state.roster.forEach(function (m) {
+      total += m.availability;
+      lines.push('| ' + m.name + ' | ' + m.role + ' | ' + (m.owns || '—') + ' | ' + EXPERIENCE_LEVELS[m.domainExp].label + ' | ' +
+        EXPERIENCE_LEVELS[m.techExp].label + ' | ' + m.availability + ' hrs/week | ' + (m.notes || '—') + ' |');
+    });
+    lines.push('');
+    lines.push('Total team availability: ' + total + ' hours/week across ' + state.roster.length + ' member(s) — roughly ' +
+      (total * state.buildWeeks) + ' hours over the ' + state.buildWeeks + '-week build window.');
+    return lines;
+  }
+
+  function whoLines() {
+    var lines = [];
+    if (state.teamMode === 'individual') {
+      var pd = EXPERIENCE_LEVELS[state.profileDomainExp];
+      var pt = EXPERIENCE_LEVELS[state.profileTechExp];
+      lines.push('Working **solo**.');
+      lines.push('- **Domain experience:** ' + pd.label + ' — ' + pd.directive);
+      lines.push('- **Technical / tooling experience:** ' + pt.label + ' — ' + pt.directive);
+      lines.push('- **Availability:** ' + state.profileAvailability + ' hours/week (≈' + (state.profileAvailability * state.buildWeeks) + ' hours in the build window)');
+      lines.push('- **Notes:** ' + (state.profileNotes.trim() || 'None.'));
+    } else if (state.roster.length) {
+      lines = lines.concat(rosterTable());
+    } else {
+      lines.push('Working as a **team**, but no members have been added yet — treat role assignments as placeholders.');
+    }
+    return lines;
+  }
+
+  function sharedContext() {
+    var lines = [];
+    lines.push('## COURSE CONTEXT');
+    lines = lines.concat(courseLines());
+    lines.push('');
+    lines.push('## REQUIRED COMPONENTS');
+    lines = lines.concat(componentLines());
+    lines.push('');
+    lines.push('## MILESTONE CALENDAR');
+    lines = lines.concat(milestoneLines());
+    lines.push('');
+    lines.push('## GRADING RUBRIC');
+    lines = lines.concat(rubricLines());
+    lines.push('');
+    lines.push('## PROJECT');
+    lines = lines.concat(projectLines(false));
+    lines.push('');
+    lines.push('## ' + (state.teamMode === 'team' ? 'TEAM' : 'STUDENT PROFILE'));
+    lines = lines.concat(whoLines());
+    return lines;
+  }
+
+  function buildBriefPrompt() {
+    var lines = [];
+    lines.push('## ROLE');
+    lines.push('Act as an experienced course project mentor and ' +
+      (state.track === 'research' ? 'research advisor' : 'technical architect') +
+      ' helping ' + (state.teamMode === 'team' ? 'a student team' : 'an individual student') +
+      ' scope a term project for **' + courseLabel() + '**. Your job is to make sure the project satisfies the course requirements below, fits the calendar, and scores well on the rubric — not just that it is interesting.');
+    lines.push('');
+    lines = lines.concat(sharedContext());
+    lines.push('');
+    lines.push('## REQUESTED OUTPUT');
+    var n = 1;
+    lines.push((n++) + '. A refined one-paragraph project pitch' + (components().length ? ' that explicitly names how each required component is used' : '') + '.');
+    if (components().length) {
+      lines.push((n++) + '. A component map: for each required component, what it does in this project, and how it connects to the others' + (state.integrateAll ? ' (a text architecture diagram is welcome)' : '') + '.');
+    }
+    lines.push((n++) + '. A right-sized scope — confirm or shrink the target scope against the ' + state.buildWeeks + '-week build window, complexity, constraints, and ' + (state.teamMode === 'team' ? 'team capacity' : 'my availability') + '. Name what is explicitly out of scope.');
+    lines.push((n++) + '. A plan mapped to the milestone calendar, starting from week ' + state.currentWeek + ', with what must be true at each checkpoint.');
+    if (rubric().length) lines.push((n++) + '. A rubric check: for each criterion, what evidence we’ll show to earn full credit, and where we are most likely to lose points.');
+    lines.push((n++) + '. Top risks (especially integration and timeline risks) with a mitigation for each.');
+    lines.push((n++) + '. ' + (state.track === 'research'
+      ? 'A suggested methodology and evaluation plan matched to our experience.'
+      : 'A suggested tech stack and architecture pitched at our technical experience level.'));
+    lines.push((n++) + '. Concrete next steps for the next 7 days.');
+    if (state.aiPolicy.trim()) {
+      lines.push('');
+      lines.push('Respect the AI-use policy above: help us plan and understand, and flag anything we should build or explain ourselves rather than hand off to AI.');
+    }
+    return lines.join('\n');
+  }
+
+  function buildBacklogPrompt() {
+    var m = methodObj();
+    var lines = [];
+    lines.push('## ROLE');
+    lines.push('Act as an experienced agile coach and product owner helping ' + (state.teamMode === 'team' ? 'a student team' : 'a solo student') +
+      ' turn a term project for **' + courseLabel() + '** into a realistic, prioritized backlog and sprint plan.');
+    lines.push('');
+    lines = lines.concat(sharedContext());
+    lines.push('');
+    lines.push('## REQUESTED OUTPUT');
+    lines.push('1. A product backlog of **user stories** (“As a <user>, I want <goal> so that <benefit>”), each with 2–4 acceptance criteria and a rough size (S / M / L).' +
+      (components().length ? ' Tag each story with the required component(s) it exercises, and make sure every component is covered by at least one must-have story.' : ''));
+    lines.push('2. MoSCoW priority for each story. The must-haves alone should produce a working, demonstrable result that satisfies the rubric; cut anything that does not fit the ' + state.buildWeeks + '-week build window.');
+    if (m.id === 'kanban') {
+      lines.push('3. A Kanban board layout (columns, WIP limit) and the order stories should be pulled.');
+    } else {
+      lines.push('3. A sprint plan across the build window (suggest sprint length), with a sprint goal and the stories in each sprint' + (state.integrateAll ? ' — schedule an integration story early, not on the last day' : '') + '.');
+    }
+    lines.push('4. ' + (state.teamMode === 'team'
+      ? 'An owner for each story, balanced against each member’s role, experience, and weekly hours.'
+      : 'A realistic weekly load check against my available hours.'));
+    lines.push('5. How to set this up in ' + state.pmTool + ' (columns, labels, fields) so progress is visible to the instructor.');
+    lines.push('6. ' + (state.teamMode === 'team'
+      ? 'An async standup template (3 questions) and a lightweight way to record individual contributions for the Collaboration grade.'
+      : 'A personal daily-log template that doubles as evidence for a process reflection.'));
+    lines.push('7. A demo script outline for the final presentation that walks through the must-have stories in order.');
+    return lines.join('\n');
+  }
+
+  function buildMemberPrompt(memberId) {
+    var m = state.roster.filter(function (x) { return x.id === memberId; })[0];
+    if (!m) return '';
+    var lines = [];
+    lines.push('## ROLE');
+    lines.push('Act as a mentor helping ' + m.name + ' prepare for their role (' + m.role + ') on a team term project for ' + courseLabel() + '.');
+    lines.push('');
+    lines.push('## PROJECT CONTEXT');
+    lines = lines.concat(projectLines(true));
+    lines.push('');
+    lines.push('## MEMBER PROFILE');
+    lines.push('- **Name:** ' + m.name);
+    lines.push('- **Role / track:** ' + m.role);
+    lines.push('- **Owns components:** ' + (m.owns || 'Not assigned yet'));
+    lines.push('- **Domain experience:** ' + EXPERIENCE_LEVELS[m.domainExp].label + ' — ' + EXPERIENCE_LEVELS[m.domainExp].directive);
+    lines.push('- **Technical / tooling experience:** ' + EXPERIENCE_LEVELS[m.techExp].label + ' — ' + EXPERIENCE_LEVELS[m.techExp].directive);
+    lines.push('- **Availability:** ' + m.availability + ' hours/week');
+    lines.push('- **Notes:** ' + (m.notes || 'None.'));
+    lines.push('');
+    lines.push('## REQUESTED OUTPUT');
+    lines.push('1. The 3–5 skills or concepts ' + m.name + ' should ramp up on first, given the gap between this profile and ' + (m.owns ? 'the components they own' : 'the project') + '.');
+    lines.push('2. ' + (m.owns ? 'What “done” looks like for the components they own, and the interfaces they must agree on with teammates.' : 'Which component or work package best fits their strengths.'));
+    lines.push('3. A week-by-week personal plan from week ' + state.currentWeek + ' to the final milestone, fitting ' + m.availability + ' hours/week.');
+    lines.push('4. How they can make their individual contribution visible (commits, stories closed, standup notes) for the collaboration grade.');
+    lines.push('5. A short learning plan with specific resources or practice tasks for their weakest gap area.');
+    return lines.join('\n');
+  }
+
+  function buildSynthesisPrompt() {
+    var lines = [];
+    lines.push('## ROLE');
+    lines.push('Act as an experienced ' + (state.track === 'research' ? 'research PI' : 'engineering manager') +
+      ' evaluating whether this student team, as composed, can deliver the ' + trackNoun() + ' below within ' + courseLabel() + '’s calendar and rubric.');
+    lines.push('');
+    lines.push('## PROJECT CONTEXT');
+    lines = lines.concat(projectLines(true));
+    lines.push('');
+    lines.push('## GRADING RUBRIC');
+    lines = lines.concat(rubricLines());
+    lines.push('');
+    lines.push('## TEAM ROSTER');
+    if (state.roster.length) lines = lines.concat(rosterTable());
+    else lines.push('No team members have been added yet — this synthesis will be generic until the roster is filled in.');
+    lines.push('');
+    lines.push('## REQUESTED OUTPUT');
+    lines.push('1. The team’s strengths, mapped to what this project needs' + (components().length ? ' — component by component' : '') + '.');
+    lines.push('2. Gaps (domain knowledge, technical skill, or capacity), including any required component nobody is well-placed to own.');
+    lines.push('3. A capability-to-deliver verdict — On track / At risk / Not feasible as scoped — tied to the build window, milestones, and constraints.');
+    lines.push('4. A recommended goal statement right-sized to this team. Say plainly if scope should be narrowed.');
+    lines.push('5. A role and component ownership allocation across the roster, with an integration owner named.');
+    lines.push('6. The top 3 team-composition risks and how to mitigate each, including how to keep individual contributions fair and visible.');
+    return lines.join('\n');
+  }
+
+  function buildPrompt() {
+    if (state.outputTarget === 'backlog') return buildBacklogPrompt();
+    if (state.teamMode === 'team' && state.outputTarget === 'synthesis') return buildSynthesisPrompt();
+    return buildBriefPrompt();
+  }
+
+  // ---- Output rendering ----
+
+  function renderOutput() {
+    if (restoring) return;
+    var text = buildPrompt();
+    els.outputBox.textContent = text;
+    els.outputBox.classList.toggle('empty', !text);
+    els.charCount.textContent = text.length + ' characters';
+    els.wordCount.textContent = text.split(/\s+/).filter(Boolean).length + ' words';
+  }
+
+  // ---- Clipboard / download helpers ----
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopyToast).catch(function () { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showCopyToast(); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+  }
+
+  function showCopyToast() {
+    els.copyToast.classList.add('show');
+    setTimeout(function () { els.copyToast.classList.remove('show'); }, 1800);
+  }
+
+  function downloadText(text, filename) {
+    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(a.href);
+      document.body.removeChild(a);
+    }, 100);
+  }
+
+  // ---- Sync / events ----
+
+  var TEXT_FIELDS = ['courseName', 'courseFocus', 'teamSizeRule', 'aiPolicy', 'problemStatement', 'additionalConstraints', 'profileNotes', 'additional'];
+  var COURSE_FIELDS = ['courseName', 'courseFocus', 'teamSizeRule', 'aiPolicy'];
+
+  function syncFormFromState() {
+    restoring = true;
+    renderPresetSelect();
+    renderMethodSeg();
+    renderDomainSelect();
+    renderSubIndustrySelect();
+    TEXT_FIELDS.forEach(function (key) { $(key).value = state[key]; });
+    $('projectWeight').value = state.projectWeight;
+    $('currentWeek').value = state.currentWeek;
+    $('pmToolSelect').value = state.pmTool;
+    $('integrateAll').checked = !!state.integrateAll;
+
+    [['courseWeeksSlider', 'courseWeeksValue', 'courseWeeks', ' weeks'],
+     ['buildWeeksSlider', 'buildWeeksValue', 'buildWeeks', ' weeks'],
+     ['profileAvailabilitySlider', 'profileAvailabilityValue', 'profileAvailability', ' hrs/week']
+    ].forEach(function (s) {
+      $(s[0]).value = state[s[2]];
+      $(s[1]).textContent = state[s[2]] + s[3];
+    });
+
+    $('complexitySlider').value = state.complexity;
+    $('scopeSlider').value = state.scope;
+    $('pressureSlider').value = state.constraintPressure;
+    $('profileDomainSlider').value = state.profileDomainExp;
+    $('profileTechSlider').value = state.profileTechExp;
+
+    setFraming(state.problemFraming);
+    setTrack(state.track);
+    setTeamMode(state.teamMode);
+    Object.keys(levelCtls).forEach(function (k) { levelCtls[k].render(); });
+
+    renderLists();
+    renderConstraintGrid();
+    renderRoster();
+
+    restoring = false;
+    renderOutput();
+  }
+
+  function bindEvents() {
+    $('presetSelect').addEventListener('change', function () {
+      var id = $('presetSelect').value;
+      if (id === 'custom') { renderPresetSelect(); return; }
+      if (state.preset === 'custom' && !confirm('Replace your edited course details with this preset?')) {
+        renderPresetSelect();
+        return;
+      }
+      applyPreset(id);
+    });
+
+    $('trackApplication').addEventListener('click', function () { setTrack('application'); });
+    $('trackResearch').addEventListener('click', function () { setTrack('research'); });
+    $('teamIndividual').addEventListener('click', function () { setTeamMode('individual'); });
+    $('teamTeam').addEventListener('click', function () { setTeamMode('team'); });
+
+    document.querySelectorAll('#framingSeg button').forEach(function (btn) {
+      btn.addEventListener('click', function () { setFraming(btn.getAttribute('data-value')); });
+    });
+    document.querySelectorAll('#outputTargetBlock button').forEach(function (btn) {
+      btn.addEventListener('click', function () { setOutputTarget(btn.getAttribute('data-target')); });
+    });
+
+    els.domainSelect.addEventListener('change', function () {
+      state.domain = els.domainSelect.value;
+      renderSubIndustrySelect();
+      changed();
+    });
+    els.subIndustrySelect.addEventListener('change', function () {
+      state.subIndustry = els.subIndustrySelect.value;
+      changed();
+    });
+
+    TEXT_FIELDS.forEach(function (key) {
+      $(key).addEventListener('input', function () {
+        state[key] = $(key).value;
+        if (COURSE_FIELDS.indexOf(key) >= 0) markCustom();
+        changed();
+      });
+    });
+
+    $('projectWeight').addEventListener('input', function () {
+      state.projectWeight = parseInt($('projectWeight').value, 10) || 0;
+      markCustom();
+      changed();
+    });
+    $('currentWeek').addEventListener('input', function () {
+      state.currentWeek = Math.max(1, parseInt($('currentWeek').value, 10) || 1);
+      changed();
+    });
+    $('pmToolSelect').addEventListener('change', function () {
+      state.pmTool = $('pmToolSelect').value;
+      changed();
+    });
+    $('integrateAll').addEventListener('change', function () {
+      state.integrateAll = $('integrateAll').checked;
+      markCustom();
+      changed();
+    });
+    ['courseWeeksSlider', 'buildWeeksSlider'].forEach(function (id) {
+      $(id).addEventListener('input', markCustom);
+    });
+
+    $('addComponentBtn').addEventListener('click', function () {
+      state.components.push('');
+      markCustom();
+      renderComponents();
+      var inputs = $('componentList').querySelectorAll('input');
+      inputs[inputs.length - 1].focus();
+      changed();
+    });
+    $('addMilestoneBtn').addEventListener('click', function () {
+      var last = milestones().slice(-1)[0];
+      state.milestones.push({ week: Math.min(state.courseWeeks, last ? last.week + 1 : 1), text: '' });
+      markCustom();
+      renderMilestones();
+      var inputs = $('milestoneList').querySelectorAll('input[type="text"]');
+      inputs[inputs.length - 1].focus();
+      changed();
+    });
+    $('addRubricBtn').addEventListener('click', function () {
+      state.rubric.push({ name: '', weight: 0, desc: '' });
+      markCustom();
+      renderRubric();
+      var inputs = $('rubricList').querySelectorAll('input[type="text"]');
+      inputs[inputs.length - 2].focus();
+      changed();
+    });
+
+    $('addMemberBtn').addEventListener('click', addMember);
+
+    $('copyBtn').addEventListener('click', function () { copyText(buildPrompt()); });
+    $('downloadBtn').addEventListener('click', function () {
+      var base = slug(state.courseName) || 'term-project';
+      downloadText(buildPrompt(), base + '-' + state.outputTarget + '-prompt.txt');
+    });
+
+    $('clearBtn').addEventListener('click', function () {
+      if (!confirm('Clear all builder settings and reset to defaults?')) return;
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+      state = defaultState();
+      syncFormFromState();
+    });
+
+    $('openLlmBtn').addEventListener('click', function () {
+      copyText(buildPrompt());
+      var url = LLM_URLS[els.llmSelect.value] || LLM_URLS.claude;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  function initEls() {
+    els.domainSelect = $('domainSelect');
+    els.subIndustrySelect = $('subIndustrySelect');
+    els.outputBox = $('outputBox');
+    els.charCount = $('charCount');
+    els.wordCount = $('wordCount');
+    els.copyToast = $('copyToast');
+    els.llmSelect = $('llmSelect');
+    els.rosterList = $('rosterList');
+  }
+
+  // Deep-link a preset, e.g. term-project.html?preset=ai410
+  function applyUrlPreset() {
+    var match = /[?&]preset=([a-z0-9-]+)/i.exec(window.location.search);
+    if (!match) return false;
+    var id = match[1].toLowerCase();
+    if (!PRESETS.some(function (p) { return p.id === id; })) return false;
+    if (state.preset === id) return false;
+    var course = clone(PRESETS.filter(function (p) { return p.id === id; })[0].course);
+    Object.keys(course).forEach(function (k) { state[k] = course[k]; });
+    state.preset = id;
+    return true;
+  }
+
+  initEls();
+  loadState();
+  applyUrlPreset();
+  setupSliders();
+  bindEvents();
+  syncFormFromState();
+  saveState();
+})();
+  </script>
+</body>
+</html>
